@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="Stephan Garbin, based on template in README">
+  <title>UCL CG</title>
+  <link href="/public/css/plugins/bootstrap.min.css" rel="stylesheet">
+  <link href="/public/css/plugins/sb-admin.css" rel="stylesheet">
+  <link href="/public/fonts/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="/public/css/plugins/jquery-ui.css">
+  <!-- Codemirror-->
+  <link rel="stylesheet" href="/public/css/plugins/codemirror.css">
+  <link rel="stylesheet" href="/public/css/plugins/theme/base16-dark.css">
+  <link rel="stylesheet" href="/public/css/plugins/theme/colorforth.css">
+  <link rel="stylesheet" href="/public/codemirror/addon/dialog/dialog.css">
+  <link rel="stylesheet" href="/public/codemirror/addon/search/matchesonscrollbar.css">
+  <link rel="stylesheet" href="/public/codemirror/addon/fold/foldgutter.css">
+  <!-- UCL-->
+  <link href="/public/css/index.css" rel="stylesheet">
+</head>
+<!-- Navigation-->
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+  <!-- Brand and toggle get grouped for better mobile display-->
+  <div class="navbar-header"><a class="navbar-brand" id="mainTitle" href="/">UCL Computer Graphics</a></div>
+  <!-- Top Menu Items-->
+  <ul class="nav navbar-right top-nav">
+    <li><a class="cursor-pointer" id="menuHelp"><i class="fa fa-fw fa-question-circle"></i> Help</a></li>
+    <li><a class="cursor-pointer" id="menuLogin"><i class="fa fa-fw fa-user"></i> Login</a></li>
+    <li><a class="cursor-pointer" id="reloadSamePage" href="/"><i class="fa fa-fw fa-file"></i> Back to index</a></li>
+    <li class="dropdown"><a class="dropdown-toggle" href="#" data-toggle="dropdown"><i class="fa fa-align-justify"></i><b class="caret"></b></a>
+      <ul class="dropdown-menu">
+        <li><a id="menuLoad" href="#"><i class="fa fa-fw fa-upload"></i> Load Setup</a></li>
+        <li><a id="menuSave" href="#"><i class="fa fa-fw fa-download"></i> Save Setup</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+<div id="page-wrapper">
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-md-12">
+        <div id="setupIntro">
+          <p>Please<strong>don&apos;t forget to save your work to disk</strong> every now and then!<strong>
+              To
+              update the render view</strong>: click the<strong>refresh button</strong> or hit<strong>ctrl-s/cmd-s</strong>.
+            If that has no effect, you have probably made an error somewhere! Happy coding!
+          </p>
+          <div class="col-md-12" id="setupTabs">
+            <!-- We load extra stuff here-->
+            <ul id="setupTabsUL"></ul>
+          </div>
+        </div>
+        <!-- setupIntro div-->
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <div style="display: none;">
+          <input id="loadExperimentInput" type="file">
+        </div>
+      </div>
+      <div class="col-xs-12" id="viewerControls">
+        <!-- buttons--><span style="display: inline-block"><a class="btn btn-info" id="refreshButton" href="#"><i class="fa fa-refresh" title="Refresh"></i></a><a class="btn btn-default" id="toFirstFrameButton" href="#"><i class="fa fa-fast-backward" title="Backward"></i></a><a class="btn btn-default" id="frameBackwardButton" href="#"><i class="fa fa-step-backward" title="Frame Backward"></i></a><a class="btn btn-default" id="stopButton" href="#"><i class="fa fa-stop" title="Stop"></i></a><a class="btn btn-default" id="playButton" href="#"><i class="fa fa-play" title="Play"></i></a><a class="btn btn-default" id="frameForwardButton" href="#"><i class="fa fa-step-forward" title="Frame Forward"></i></a><a class="btn btn-default" id="toLastFrameButton" href="#"><i class="fa fa-fast-forward" title="Forward"></i></a></span>
+        <!-- frame controls--><span style="display: inline-block">
+          <input class="form-control" id="currentFrameInput" type="text" style="width: 75px; display: inline;">
+          <input class="form-control" id="maxFramesInput" type="text" style="width: 75px; display: inline;"></span>
+        <!-- resolution controls--><span style="display: inline-block"><a class="btn btn-default" id="decreaseResolutionButton" href="#"><i class="fa fa-compress" title="Decrease Resolution"></i></a><a class="btn btn-default" id="increaseResolutionButton" href="#"><i class="fa fa-expand" title="Increase Resolution"></i></a>
+          <input class="form-control" id="currentResolution" type="text" value="800x400" style="width: 125px; display: inline;" disabled=""></span>
+      </div>
+      <!-- view controls-->
+    </div>
+    <div class="row" id="viewerRow">
+      <div class="col-sm-12 col-md-10 col-lg-8" id="mainCol">
+        <!-- Actual render target-->
+        <div id="renderTarget">
+          <canvas id="glRenderTarget" width="800" height="400" style="display: none;"></canvas>
+        </div>
+        <!-- viewport display-->
+        <div id="viewer">
+          <canvas id="glViewport" width="800" height="400" style="width:100%"></canvas>
+        </div>
+      </div>
+      <!-- mainCol-->
+    </div>
+    <!-- viewer  row-->
+    <div class="row" id="tabSpace">
+      <div class="col-md-12" id="mainCol">
+        <!-- EMPTY TABS-->
+        <div class="codeTab" id="implementationTabs">
+          <ul id="implementationTabsUL"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /.container-fluid-->
+</div>
+<!-- /#page-wrapper-->
+<div id="floatingPreview">
+  <canvas id="glViewportSmallClone" width="350" height="175"></canvas>
+</div>
+<script src="/public/js/plugins/jquery.js"></script>
+<script src="http://code.jquery.com/ui/1.12.1/jquery-ui.min.js" integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+<script src="/public/js/plugins/bootstrap.min.js"></script>
+<script src="/public/js/plugins/codemirror.js"></script>
+<script src="/public/mode/javascript/javascript.js"></script>
+<script src="/public/mode/clike/clike.js"></script>
+<script src="/public/codemirror/addon/dialog/dialog.js"></script>
+<script src="/public/codemirror/addon/selection/active-line.js"></script>
+<script src="/public/codemirror/addon/edit/closebrackets.js"></script>
+<script src="/public/codemirror/addon/edit/matchbrackets.js"></script>
+<script src="/public/codemirror/addon/fold/foldcode.js"></script>
+<script src="/public/codemirror/addon/fold/foldgutter.js"></script>
+<script src="/public/codemirror/addon/fold/brace-fold.js"></script>
+<script src="/public/codemirror/addon/fold/xml-fold.js"></script>
+<script src="/public/codemirror/addon/fold/markdown-fold.js"></script>
+<script src="/public/codemirror/addon/fold/comment-fold.js"></script>
+<script src="/public/js/framework.js"></script>
+<script src="/public/js/plugins/J3DI.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="/public/js/index.js"></script>
+<!-- Google Line Charts-->
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">google.charts.load('current', {packages: ['corechart', 'line']});</script>
+<!-- Modals-->
+<!-- Page Reload-->
+<div class="modal fade" id="reloadConfirm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Return to index?</h4>
+      </div>
+      <div class="modal-body alert alert-danger"><strong>Leaving this page will erase any unsaved progress. Continue?</strong></div>
+      <div class="modal-footer">
+        <button class="btn btn-default" type="button" data-dismiss="modal">Close</button>
+        <button class="btn btn-primary" id="confirmPageReload" type="button">Leave</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Help-->
+<div class="modal fade" id="helpPage" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Useful Shortcuts</h4>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-success">
+          <ul>
+            <li><b>Ctrl-F / Cmd-F :</b>Search</li>
+            <li><b>Alt-G :</b>Jump to a specific line</li>
+            <li><b>Ctrl-Q :</b>Collapses current segment</li>
+          </ul>
+        </div>
+        <p>Happy Coding!</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default" type="button" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Login-->
+<div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Login</h4>
+      </div>
+      <form action="/login" method="POST">
+        <div class="modal-body alert alert-info" id="loginModalFormDiv">
+          <p>Please login to access this page:</p>
+          <div class="form-group">
+            <label class="control-label" for="loginUser">Your username:</label>
+            <input class="form-control" id="loginUser" name="username" type="username">
+          </div>
+          <div class="form-group">
+            <label class="control-label" for="loginPassword">Your password:</label>
+            <input class="form-control" id="loginPassword" name="password" type="password">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-default" type="button" data-dismiss="modal">Close</button>
+          <button class="btn btn-primary" id="submitLogin" type="submit">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="Stephan Garbin">
+  <title>UCL CG</title>
+  <link href="public/css/plugins/bootstrap.min.css" rel="stylesheet">
+  <link href="public/css/plugins/sb-admin.css" rel="stylesheet">
+  <link href="public/css/plugins/morris.css" rel="stylesheet">
+  <link href="public/fonts/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+  <link href="public/css/admin.css" rel="stylesheet">
+</head>
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+  <div class="navbar-header"><a class="navbar-brand" href="/">UCL Computer Graphics</a></div>
+  <!-- Top Menu Items-->
+  <ul class="nav navbar-right top-nav">
+    <li><a class="cursor-pointer" href="/"><i class="fa fa-fw fa-home"></i> Home</a></li>
+    <li><a class="cursor-pointer" href="/logout"><i class="fa fa-fw fa-sign-out"></i> Logout</a></li>
+  </ul>
+  <div class="collapse navbar-collapse navbar-ex1-collapse"></div>
+</nav>
+<div id="page-wrapper">
+  <div class="container-fluid">
+    <div id="setupIntro">
+      <div class="row">
+        <div class="col-md-12">
+          <div class="row">
+            <p>Delete setups below or add a new one.</p>
+            <p><a class="btn btn-primary" id="addSetupButton" href="#" role="button">Create New</a></p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-12" id="spaceForSetups"></div>
+    </div>
+  </div>
+</div>
+<script src="public/js/plugins/jquery.js"></script>
+<script src="public/js/plugins/bootstrap.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="public/js/plugins/socket.io-stream.js"></script>
+<script src="public/js/admin.js"></script>
+<div class="modal fade" id="addSetupModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button class="close" type="button" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Add Setup</h4>
+      </div>
+      <div class="modal-body" id="addSetupModalFormDiv">
+        <form id="addSetupForm">
+          <div class="form-group">
+            <label for="jsFileFormComponent">Javascript Definition</label>
+            <input class="form-control-file" id="jsFileFormComponent" name="jsFile" type="file" aria-describedby="fileHelp"><small class="form-text text-muted" id="fileHelp">The javascript file defining this setup.</small>
+          </div>
+          <div class="form-group">
+            <label for="pictureFormComponent">Image</label>
+            <input class="form-control-file" id="pictureFormComponent" name="picture" type="file" aria-describedby="fileHelp"><small class="form-text text-muted" id="picture">An image illustrating this example.</small>
+          </div>
+          <div class="form-group">
+            <label for="categoryFormComponent">Setup Category</label>
+            <select class="form-control" id="categoryFormComponent" name="category" multiple="">
+              <option>Introduction</option>
+              <option>Raytracing</option>
+              <option>Pathtracing</option>
+              <option>Coursework</option>
+              <option>Meshes</option>
+              <option>OpenGL</option>
+              <option>Splines</option>
+              <option>Demos</option>
+            </select>
+          </div>
+          <div class="form-group row">
+            <label class="col-xs-2 col-form-label" for="niceNameFormComponent">Setup Name</label>
+            <div class="col-xs-12">
+              <input class="form-control" id="niceNameFormComponent" name="niceName" type="text" value="">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-xs-2 col-form-label" for="shortDescriptionFormComponent">
+              Short
+              Description
+            </label>
+            <div class="col-xs-12">
+              <input class="form-control" id="shortDescriptionFormComponent" name="shortDescription" type="text" value="">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-xs-2 col-form-label" for="authorFormComponent">Author Name</label>
+            <div class="col-xs-12">
+              <input class="form-control" id="authorFormComponent" name="author" type="text" value="">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-default" type="button" data-dismiss="modal">Close</button>
+        <button class="btn btn-primary" id="submitAddSetup" type="button">Submit</button>
+      </div>
+    </div>
+  </div>
+</div>

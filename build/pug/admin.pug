@@ -1,0 +1,88 @@
+doctype html
+head
+    meta(charset='utf-8')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    meta(name='description', content='')
+    meta(name='author', content='Stephan Garbin')
+    title UCL CG
+    link(href='public/css/plugins/bootstrap.min.css', rel='stylesheet')
+    link(href='public/css/plugins/sb-admin.css', rel='stylesheet')
+    link(href='public/css/plugins/morris.css', rel='stylesheet')
+    link(href='public/fonts/font-awesome/css/font-awesome.min.css', rel='stylesheet', type='text/css')
+    link(href='public/css/admin.css', rel='stylesheet')
+nav.navbar.navbar-inverse.navbar-fixed-top(role='navigation')
+    .navbar-header
+        a.navbar-brand(href='/') UCL Computer Graphics
+    // Top Menu Items
+    ul.nav.navbar-right.top-nav
+        li
+            a.cursor-pointer(href='/')
+                i.fa.fa-fw.fa-home
+                |  Home
+        li
+            a.cursor-pointer(href='/logout')
+                i.fa.fa-fw.fa-sign-out
+                |  Logout
+    .collapse.navbar-collapse.navbar-ex1-collapse
+#page-wrapper
+    .container-fluid
+        #setupIntro
+            .row
+                .col-md-12
+                    .row
+                        p Delete setups below or add a new one.
+                        p
+                            a#addSetupButton.btn.btn-primary(href='#', role='button') Create New
+            #spaceForSetups.col-md-12
+script(src='public/js/plugins/jquery.js')
+script(src='public/js/plugins/bootstrap.min.js')
+script(src='/socket.io/socket.io.js')
+script(src='public/js/plugins/socket.io-stream.js')
+script(src='public/js/admin.js')
+#addSetupModal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='myModalLabel')
+    .modal-dialog(role='document')
+        .modal-content
+            .modal-header
+                button.close(type='button', data-dismiss='modal', aria-label='Close')
+                    span(aria-hidden='true') &times;
+                h4#myModalLabel.modal-title Add Setup
+            #addSetupModalFormDiv.modal-body
+                form#addSetupForm
+                    .form-group
+                        label(for='jsFileFormComponent') Javascript Definition
+                        input#jsFileFormComponent.form-control-file(name='jsFile', type='file', aria-describedby='fileHelp')
+                        small#fileHelp.form-text.text-muted
+                            | The javascript file defining this setup.
+                    .form-group
+                        label(for='pictureFormComponent') Image
+                        input#pictureFormComponent.form-control-file(name='picture', type='file', aria-describedby='fileHelp')
+                        small#picture.form-text.text-muted An image illustrating this example.
+                    .form-group
+                        label(for='categoryFormComponent') Setup Category
+                        select#categoryFormComponent.form-control(name='category', multiple='')
+                            option Introduction
+                            option Raytracing
+                            option Pathtracing
+                            option Coursework
+                            option Meshes
+                            option OpenGL
+                            option Splines
+                            option Demos
+                    .form-group.row
+                        label.col-xs-2.col-form-label(for='niceNameFormComponent') Setup Name
+                        .col-xs-12
+                            input#niceNameFormComponent.form-control(name='niceName', type='text', value='')
+                    .form-group.row
+                        label.col-xs-2.col-form-label(for='shortDescriptionFormComponent')
+                            | Short
+                            | Description
+                        .col-xs-12
+                            input#shortDescriptionFormComponent.form-control(name='shortDescription', type='text', value='')
+                    .form-group.row
+                        label.col-xs-2.col-form-label(for='authorFormComponent') Author Name
+                        .col-xs-12
+                            input#authorFormComponent.form-control(name='author', type='text', value='')
+            .modal-footer
+                button.btn.btn-default(type='button', data-dismiss='modal') Close
+                button#submitAddSetup.btn.btn-primary(type='button') Submit
