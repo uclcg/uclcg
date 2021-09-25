@@ -8,7 +8,7 @@ implementing and submitting the coursework and assignments.
 
 To get started, please have a look at the [WebGL spec](https://www.khronos.org/registry/webgl/specs/latest/1.0/)
 and the OpenGL ES Shading Language [GLSL](https://www.khronos.org/files/opengles_shading_language.pdf).
-We have prepared three simple demo scripts (demo1, demo2, demo3) to help you get started.
+We have prepared three simple demo scripts ([demo1](demos/cameraSimple.uclcg), [demo2](demos/openGL.uclcg), [demo3](demos/splines.uclcg)) to help you get started.
 You can look at and play with the code to get a feel for the system and for graphics programming.
 
 ## How To Use 

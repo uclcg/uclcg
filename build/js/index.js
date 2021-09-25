@@ -506,12 +506,20 @@ $(document).ready(function () {
         $("#setupTabs").tabs();
     });*/
 
-    fetch('https://github.com/uclcg/uclcg/blob/test/demos/cameraSimple.uclcg', {mode: 'cors'})
-    .then(res => res.blob()) // Gets the response and returns it as a blob
-    .then(blob => {
-        var file = new File([blob], blob);
-        loadjsfile(file);
-    });
+    // from url doesnt work bc of CORS error.
+//    console.log(scriptPath);
+//    fetch(scriptPath)
+//    .then(res => res.blob()) // Gets the response and returns it as a blob
+//    .then(blob => {
+//        var file = new File([blob], blob);
+//        loadjsfile(file);
+//    });
+
+//    $.getJSON('https://github.com/uclcg/uclcg/blob/test/demos/cam.json', function(data) {
+//        var file = JSON.parse(data)
+//        console.log(file)
+//    });
+
 
 //    var blob = null
 //    var xhr = new XMLHttpRequest()
