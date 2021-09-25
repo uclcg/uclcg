@@ -22,11 +22,9 @@ The DB access has been removed. This project implements an online framework for 
 
 ```bash
 ### Clone git repo
-git https://github.com/thigitogatiamas/UCLComputerGraphics.git
-or
-git clone git@github.com:thigitogatiamas/UCLComputerGraphics.git
+# git clone <repo-address> 
 
-cd UCLComputerGraphics
+cd uclcg
 
 ### Check MongoDB service status
 sudo systemctl status mongod.service
