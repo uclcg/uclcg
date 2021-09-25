@@ -1,3 +1,5 @@
+![test](images/cg_teaser.png)
+
 # UCLComputerGraphics Rendering System
 
 This website hosts the [UCL Computer Graphics rendering system](https://uclcg.github.io/uclcg/public/html/index.html). 
