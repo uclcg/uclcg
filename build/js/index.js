@@ -508,7 +508,7 @@ $(document).ready(function () {
 
     // from url doesnt work bc of CORS error --> must be github.io url !!
     // var scriptPath = 'https://github.com/uclcg/uclcg/tree/test/demos/cameraSimple.uclcg'
-    var scriptPath = 'https://uclcg.github.io/uclcg/demos/cw1_student.uclcg'
+    var scriptPath = 'https://uclcg.github.io/uclcg/demos/cameraSimple.uclcg'
     console.log(scriptPath);
     fetch(scriptPath)
     .then(res => res.blob()) // Gets the response and returns it as a blob
