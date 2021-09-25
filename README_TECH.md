@@ -6,14 +6,13 @@ The DB access has been removed. This project implements an online framework for 
 
 ## Prerequisites
 
-1. [Mongo DB](https://docs.mongodb.com/manual/administration/install-on-linux/)
-2. [Node.js](https://nodejs.org/en/download/package-manager/)
-3. [npm](https://www.npmjs.com/get-npm)
-4. [grunt](https://gruntjs.com/) (grunt-cli)
+1. [Node.js](https://nodejs.org/en/download/package-manager/)
+2. [npm](https://www.npmjs.com/get-npm)
+3. [grunt](https://gruntjs.com/) (grunt-cli)
     - npm install -g grunt-cli
-5. [Ruby](http://www.ruby-lang.org/en/downloads/)
+4. [Ruby](http://www.ruby-lang.org/en/downloads/)
     - yum -y install gcc mysql-devel ruby-devel rubygems
-6. [Sass](https://sass-lang.com/install)
+5. [Sass](https://sass-lang.com/install)
     - gem install sass
 
 
@@ -34,7 +33,7 @@ npm install
 
 ### Start Node.js server as sudo
 sudo su
-cd /home/henzler/UCLComputerGraphics && /usr/bin/forever start -c /usr/bin/node server.js
+cd uclcg && /usr/bin/forever start -c /usr/bin/node server.js
 
 ### Notes: 
 # if npm install throws gyp-rebuild error: switch to node v11.10.0, with eg: nvm use 11.10.0
@@ -46,7 +45,7 @@ This should fire up `server.js` at `localhost:8080`, if no other port is specifi
 
 ## Deployment (github-pages)
 
-The code can be found in the `build` directory. All necessary steps to compile / copy / ugly / etc. files are done via 
+The code can be found in the `build` directory. All necessary steps to compile/copy/uglify/etc. the source code are done via 
 Grunt. For use with Github pages, the grunt-created files must be sanitized after creation (see below). 
 ### Grunt
 
