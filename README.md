@@ -9,13 +9,16 @@ implementing and submitting the coursework and assignments.
 To get started, please have a look at the [WebGL spec](https://www.khronos.org/registry/webgl/specs/latest/1.0/)
 and the OpenGL ES Shading Language [GLSL](https://www.khronos.org/files/opengles_shading_language.pdf).
 We have prepared three simple demo scripts ([demo1](demos/cameraSimple.uclcg), [demo2](demos/openGL.uclcg), [demo3](demos/splines.uclcg)) to help you get started.
-You can look at and play with the code to get a feel for the system and for graphics programming.
+You can look at and play with the code to get a feel for the system and for graphics programming. 
+To do so, go to the [renderer](https://uclcg.github.io/uclcg/public/html/index.html) and click "Load Setup" in the right upper corner's dropdown menu. 
+After uploading the `.uclcg` demos, it should show the code and the corresponding rendered image. 
 
 ## How To Use 
 
 For the coursework submissions, we will provide `.uclcg` files that contain template 
 skeletons for the respective tasks that need to be solved. Uncomment the `#define` statements in the 
-first few lines to activate the respective subtasks. Put your code between the respective `#ifdef`. Remember to frequently save your progress. 
+first few lines to activate the respective subtasks. Put your code between the respective `#ifdef` and hit `ctrl/cmd + s` to update the render view.
+Remember to frequently save your progress. 
 
 ## Courseworks
 
