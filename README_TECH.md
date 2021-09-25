@@ -57,7 +57,7 @@ grunt
  This will execute the following steps: 
    - Transforms the `build/pug/**/*.pug` to `public/html/**/*.html`
    - Transforms the `build/sass/**/*.scss` to `public/css/**/*.css`
-   - Uglifies the code in `'build/js/**/*js'` to `'public/js/main.min.js'`
+   - Uglifies the code in `build/js/**/*js` to `public/js/main.min.js`
 
 After that, call 
 ```
