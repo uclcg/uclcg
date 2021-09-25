@@ -1,6 +1,6 @@
 # UCLComputerGraphics Rendering System
 
-This website hosts the UCL Computer Graphics rendering system. 
+This website hosts the [UCL Computer Graphics rendering system](https://uclcg.github.io/uclcg/public/html/index.html). 
 The system implements an online framework for executing WebGL code and for 
 implementing and submitting the coursework and assignments.
 

@@ -506,7 +506,22 @@ $(document).ready(function () {
         $("#setupTabs").tabs();
     });*/
 
-//    var file = new File([""], "/home/michi/uclcg/cw1.uclcg");
-//    loadjsfile(file);
+    fetch('https://github.com/uclcg/uclcg/blob/test/demos/cameraSimple.uclcg', {mode: 'cors'})
+    .then(res => res.blob()) // Gets the response and returns it as a blob
+    .then(blob => {
+        var file = new File([blob], blob);
+        loadjsfile(file);
+    });
+
+//    var blob = null
+//    var xhr = new XMLHttpRequest()
+//    xhr.open("GET", "https://github.com/uclcg/uclcg/blob/test/demos/cameraSimple.uclcg")
+//    xhr.responseType = "blob"
+//    xhr.onload = function() {
+//        blob = xhr.response;
+//        var file = new File([blob], blob);
+//        loadjsfile(file);
+//    }
+//    xhr.send()
 
 });
