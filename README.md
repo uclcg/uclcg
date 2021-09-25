@@ -4,7 +4,7 @@
 
 This website hosts the [UCL Computer Graphics rendering system](https://uclcg.github.io/uclcg/public/html/index.html). 
 The system implements an online framework for executing WebGL code and for 
-implementing and submitting the coursework and assignments.
+implementing and the coursework and assignments. Please have a look at the submission info below. 
 
 ## Get Started  
 
@@ -35,3 +35,4 @@ Remember to frequently save your progress.
 - **Do NOT alter the javascript code** that is contained in the `.uclcg` file you download.
 - You will not have to use any other programming languages, so please do not write answers in other languages, paper, or pseudo-code. 
 - Remember to frequently save your progress as a `.uclcg` file. In the end, hand in that file via Moodle. The filename should not contain your name. 
+- You should not have to change any other parts than the `#ifdef` statements. Please refrain from changing constants like background color, primitive position, etc., as this will make it harder to verify the correctness of your submissions. 
