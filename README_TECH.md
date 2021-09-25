@@ -26,12 +26,6 @@ The DB access has been removed. This project implements an online framework for 
 
 cd uclcg
 
-### Check MongoDB service status
-sudo systemctl status mongod.service
-
-### Start MongoDB service
-sudo systemctl start mongod.service
-
 ### Remove all node_modules
 rm -rf node_modules
 
