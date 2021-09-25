@@ -20,7 +20,7 @@ After uploading the `.uclcg` demos, it should show the code and the correspondin
 For the coursework submissions, we will provide `.uclcg` files that contain template 
 skeletons for the respective tasks that need to be solved. Uncomment the `#define` statements in the 
 first few lines to activate the respective subtasks. Put your code between the respective `#ifdef` and hit `ctrl/cmd + s` to update the render view.
-Remember to frequently save your progress. 
+Remember to frequently save your progress - to do so, the system provides the 'Save Setup' functionality in the dropdown menu in the upper right corner. 
 
 ## Courseworks
 
