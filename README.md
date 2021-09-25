@@ -34,5 +34,5 @@ Remember to frequently save your progress - to do so, the system provides the 'S
 - **Do NOT copy-paste your code into a .txt file and simply name it `*.uclcg`**, as this will not be renderable by the system. Instead, use the provided "Save Setup" functionality in the right upper corner, so that we can "Load Setup" your submission.
 - **Do NOT alter the javascript code** that is contained in the `.uclcg` file you download.
 - You will not have to use any other programming languages, so please do not write answers in other languages, paper, or pseudo-code. 
-- Remember to frequently save your progress as a `.uclcg` file. In the end, hand in that file via Moodle. The filename should not contain your name. 
+- In the end, submit your final `.uclcg` file via Moodle. The filename should not contain your name. 
 - You should not have to change any other parts than the `#ifdef` statements. Please refrain from changing constants like background color, primitive position, etc., as this will make it harder to verify the correctness of your submissions. 
