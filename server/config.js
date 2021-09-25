@@ -8,8 +8,8 @@ shell.mkdir('-p', 'public/experiments/code');
 module.exports = {
     port: 8080,
     user: {
-        username: 'admin',
-        password: 'PxrUPBP2001!'
+        username: 'none',       // remove credentials
+        password: 'none'
     },
     database: {
         path: 'mongodb://localhost/cg_v_1'
