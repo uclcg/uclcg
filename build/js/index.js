@@ -506,30 +506,15 @@ $(document).ready(function () {
         $("#setupTabs").tabs();
     });*/
 
-    // from url doesnt work bc of CORS error.
-//    console.log(scriptPath);
-//    fetch(scriptPath)
-//    .then(res => res.blob()) // Gets the response and returns it as a blob
-//    .then(blob => {
-//        var file = new File([blob], blob);
-//        loadjsfile(file);
-//    });
-
-//    $.getJSON('https://github.com/uclcg/uclcg/blob/test/demos/cam.json', function(data) {
-//        var file = JSON.parse(data)
-//        console.log(file)
-//    });
-
-
-//    var blob = null
-//    var xhr = new XMLHttpRequest()
-//    xhr.open("GET", "https://github.com/uclcg/uclcg/blob/test/demos/cameraSimple.uclcg")
-//    xhr.responseType = "blob"
-//    xhr.onload = function() {
-//        blob = xhr.response;
-//        var file = new File([blob], blob);
-//        loadjsfile(file);
-//    }
-//    xhr.send()
+    // from url doesnt work bc of CORS error --> must be github.io url !!
+    // var scriptPath = 'https://github.com/uclcg/uclcg/tree/test/demos/cameraSimple.uclcg'
+    var scriptPath = 'https://uclcg.github.io/uclcg/demos/cw1_student.uclcg'
+    console.log(scriptPath);
+    fetch(scriptPath)
+    .then(res => res.blob()) // Gets the response and returns it as a blob
+    .then(blob => {
+        var file = new File([blob], blob);
+        loadjsfile(file);
+    });
 
 });

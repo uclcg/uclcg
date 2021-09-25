@@ -1,6 +1,8 @@
 # UCLComputerGraphics
 
-This project implements an online framework for testing and debugging code in javascript and webGL for use at UCL. It also servers as a platform for designing and editing coursework.
+This is a static build of the dynamic rendering system hosted by UCL CS. 
+The DB access has been removed. This project implements an online framework for testing and debugging code in javascript and WebGL for use at UCL. It also serves as a platform for designing and editing coursework.
+
 
 ## Prerequisites
 
@@ -9,12 +11,13 @@ This project implements an online framework for testing and debugging code in ja
 3. [npm](https://www.npmjs.com/get-npm)
 4. [grunt](https://gruntjs.com/) (grunt-cli)
     - npm install -g grunt-cli
-4. [Ruby](http://www.ruby-lang.org/en/downloads/)
+5. [Ruby](http://www.ruby-lang.org/en/downloads/)
     - yum -y install gcc mysql-devel ruby-devel rubygems
-5. [Sass](https://sass-lang.com/install)
+6. [Sass](https://sass-lang.com/install)
     - gem install sass
 
-## How to use
+
+## Development (local)
 
 
 ```bash
@@ -41,60 +44,33 @@ npm install
 sudo su
 cd /home/henzler/UCLComputerGraphics && /usr/bin/forever start -c /usr/bin/node server.js
 
+### Notes: 
+# if npm install throws gyp-rebuild error: switch to node v11.10.0, with eg: nvm use 11.10.0
+# full forever path might be unnecessary: forever start server.js
+# when the source code has changed, it is necessary to recompile with grunt for the changes to be shown  
 ```
 
-## Development
+This should fire up `server.js` at `localhost:8080`, if no other port is specified (cf.`server/config.js`) 
+
+## Deployment (github-pages)
 
 The code can be found in the `build` directory. All necessary steps to compile / copy / ugly / etc. files are done via 
-Grunt. Most external libraries can be found in the
+Grunt. For use with Github pages, the grunt-created files must be sanitized after creation (see below). 
 ### Grunt
 
-To run the application go to the root folder of the application and run:
-
-Before you are able to use grunt install:
-
-```
-npm install -g grunt-cli
-```
-
-Then use:
+To compile, go to the source directory and call
 
 ```
 grunt
 ```
-
+ This will execute the following steps: 
    - Transforms the `build/pug/**/*.pug` to `public/html/**/*.html`
    - Transforms the `build/sass/**/*.scss` to `public/css/**/*.css`
    - Uglifies the code in `'build/js/**/*js'` to `'public/js/main.min.js'`
 
-## Deployment
-
+After that, call 
 ```
-git pull origin master
-
-# change port in config file to 80 (if need be)
-grunt
+python sanitize.py  
 ```
-
-
-## Miscellaneous
-
-### Crontab
-
-```
-### Restart Node.js server on reboot
-sudo crontab -e
-
-### Add following line
-@reboot cd /home/henzler/UCLComputerGraphics && /usr/bin/forever start -c /usr/bin/node server.js
-```
-
-### Config
-
-
-Edit the config file under:
-
-```
-nano ./server.config.js
-```
+to modify the path variables in `index.html`. You can then proceed to push to Github. Note that it might take some time (~2-5 min) for the changes to be shown on the live website. 
 
