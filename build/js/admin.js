@@ -12,6 +12,7 @@ $(document).ready(function () {
         //get items from the server
         socket.emit('getAllSetups', {});
         socket.on('returnAllSetups', function (data) {
+            console.log("In ADMIN.JS -- this shoudldnt happen!");
             var setups = JSON.parse(data);
             //make sure everything has a category
             for (var gI = 0; gI < setups.length; ++gI) {
