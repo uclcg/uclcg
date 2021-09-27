@@ -1,4 +1,4 @@
 https://uclcg.github.io/uclcg/demos/cw1_student.uclcg, CW1, https://uclcg.github.io/uclcg/demos/thumb1.png, CW1-RayTracing, this is a cw1 description, Michael Fischer, false 
-https://uclcg.github.io/uclcg/demos/cameraSimple.uclcg, Demos, https://uclcg.github.io/uclcg/demos/thumb2.png, CamDemo, this is a camDemo, Michael Fischer, false 
+https://mfischer-ucl.github.io/uclcg/demos/cameraSimple.uclcg, Demos, https://uclcg.github.io/uclcg/demos/thumb2.png, CamDemo, this is a camDemo, Michael Fischer, false 
 https://uclcg.github.io/uclcg/demos/splines.uclcg
 blablaTest
