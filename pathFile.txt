@@ -1,0 +1,3 @@
+https://uclcg.github.io/uclcg/demos/cw1_student.uclcg
+https://uclcg.github.io/uclcg/demos/cw2_student.uclcg
+https://uclcg.github.io/uclcg/demos/cw3_student.uclcg
