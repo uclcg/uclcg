@@ -507,14 +507,140 @@ $(document).ready(function () {
     });*/
 
     // from url doesnt work bc of CORS error --> must be github.io url !!
-    // var scriptPath = 'https://github.com/uclcg/uclcg/tree/test/demos/cameraSimple.uclcg'
-    var scriptPath = 'https://uclcg.github.io/uclcg/demos/cw1_student.uclcg'
+//    var scriptPath = 'https://uclcg.github.io/uclcg/demos/cw1_student.uclcg'        // must read from github.io address, or else get CORS error
+    var scriptPath = 'https://mfischer-ucl.github.io/uclcg/demos/cw1_student.uclcg'        // must read from github.io address, or else get CORS error
     console.log(scriptPath);
-    fetch(scriptPath)
-    .then(res => res.blob()) // Gets the response and returns it as a blob
-    .then(blob => {
+    fetch(scriptPath).then(res => res.blob()).then(blob => {
         var file = new File([blob], blob);
         loadjsfile(file);
     });
 
+    class Setup {
+        constructor(jsFile, category, picture, niceName, shortDescription, author, hidden) {
+            this.jsFile = jsFile;
+            this.category = category;
+            this.picture = picture;
+            this.niceName = niceName;
+            this.shortDescription = shortDescription;
+            this.author = author;
+            this.hidden = hidden;
+        }
+    }
+
+    // the pathFile contains all info about the cw files that must be display on the welcome page.
+    // each line contain (comma-separated):
+    // uclcg-url, category, thumbnail-url, cw_name, shortDescription, author, isHidden
+    // the following code reads the pathFile, and processes each line sequentially, splits it into parts, and creates
+    // a "setup" object that resembles the content of the database the old system used. the setup objects are then
+    // passed to a display-routine (copied from old version, see above).
+
+
+    /*var filePath = 'https://uclcg.github.io/uclcg/pathFile.txt'
+    fetch(filePath).then(res => res.blob()).then(blob => {
+        var file = new File([blob], blob);
+        var read = new FileReader();
+        read.readAsBinaryString(file);
+
+        var setups = [];
+        read.onloadend = function(){
+            var lines = read.result.split('\n');             // per-line in pathFile.txt: cw info
+            for(var i = 0; i < lines.length - 1; i++) {		 // len -1 bc we dont need the last newline char
+
+                parts = lines[i].split(',');                 // get comma-separated info
+            	if(parts.length == 7) {                      // if info complete, build setup from that file
+
+                    // get jsFile contents
+                    var jsFile = null;
+                    fetch(parts[0]).then(res => res.blob()).then(blob => {      // parts[0] is the .uclcg path
+                        var file = new File([blob], blob);
+                        var read = new FileReader();
+                        read.onloadend = function() {
+                            jsFile = read.result;
+                        }
+                        read.readAsBinaryString(file);
+                    });
+
+                    // get corresponding picture
+                    var pic = null;
+                    fetch(parts[2]).then(res => res.blob()).then(blob => {      // parts[2] is the picture path
+                        var file = new File([blob], blob);
+                        var read = new FileReader();
+                        read.onloadend = function() {
+                            pic = read.result;
+                        }
+                        read.readAsBinaryString(file);
+                    });
+
+                    // cast hidden-string to bool, create setup object, append to setups list:
+                    var isHidden = (parts[6] === 'true');
+                    var s = new Setup(jsFile, parts[1], pic, parts[3], parts[4], parts[5], isHidden);
+                    setups.push(s);
+
+            	} else {
+            	    console.log("Not enough info - expected 7 values but received", parts.length);
+            	}
+            }
+
+            // all setups read and created, the rest is display stuff, copied from above!
+            console.log("Created", setups.length, "setups. Displaying them now");
+
+            tabbedSetups = [];
+            for (var s = 0; s < setups.length; ++s) {
+
+                if (!setups[s].hidden) {
+
+                    // add empty list if category doesnt exist yet
+                    if (!tabbedSetups[setups[s].category]) {
+                        tabbedSetups[setups[s].category] = [];
+                    }
+                    tabbedSetups[setups[s].category].push(setups[s]);
+                }
+            }
+
+            console.log('TabbedSetupsLength:', tabbedSetups.length)
+            for(var i = 0; i < tabbedSetups.length; i++){
+                console.log("TabbedSetupCategories:", tabbedSetups[i]);
+            }
+            //remember for delete button callbacks
+            buttonMap = [];
+
+            var tabIdx = 0;
+            Object.keys(tabbedSetups).forEach(function (key) {
+                var lSetups = tabbedSetups[key];
+
+                //Initial UL
+                $("div#setupTabs ul").append(
+                    "<li><a href='#setupTabs-" + tabIdx + "'>" + key + "</a></li>"
+                );
+                //Tab Detail
+                $("div#setupTabs").append(
+                    `<div id="setupTabs-` + tabIdx + `"></div>`
+                );
+                //add content
+                var liDiv = $(`#setupTabs-` + tabIdx);
+                liDiv.append("<div id=\"setupRow-" + key + "\"class=\"row display-flex\"></div>");
+                for (var i = 0; i < lSetups.length; ++i) {
+                    var parentRow = $("#setupRow-" + key);
+                    var pic = lSetups[i].picture
+                    var picIdx = lSetups[i].picture.lastIndexOf("/");
+                    parentRow.append(`<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                            <div class=" thumbnail">
+                                                <a id="` + key + `_load_` + i + `" href="#" class="loadButton">
+                                                <img src="` + pic.substring(0, picIdx + 1) + pic.substring(picIdx + 1) + `" alt="...">
+                                                </a>
+                                                <div class="caption">
+                                                    <h3>` + lSetups[i].niceName + `</h3>
+                                                    <p>` + lSetups[i].shortDescription + `</p>
+                                                </div>
+                                           </div>
+                                          </div>`);
+                    buttonMap[key + "_load_" + i] = {id: lSetups[i]._id, jsFile: lSetups[i].jsFile};
+                    $('.loadButton').on('click', loadSetupButton);
+                }
+                tabIdx += 1;
+            });
+            $("#setupTabs").tabs();
+
+        }
+    });*/
 });
