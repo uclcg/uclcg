@@ -579,7 +579,7 @@ $(document).ready(function () {
             var isHidden = (data.hidden[i] === 'true');
                 var s = new Setup(data.jsFiles[i], data.categories[i], data.pictures[i], data.niceNames[i], data.shortDescriptions[i], data.authors[i], isHidden);
                 s._id = i;
-                s.jsFile = 'https://mfischer-ucl.github.io/uclcg/demos/cw1_student.uclcg';
+                s.jsFile = 'https://uclcg.github.io/uclcg/demos/cw1_student.uclcg';
                 setups.push(s);
         }
 
