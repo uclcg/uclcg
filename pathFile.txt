@@ -1,4 +1,4 @@
-https://uclcg.github.io/uclcg/demos/cw1_student.uclcg, CW, picHTTPaddress, CW_name, this is a cw description, author Michael, false 
-https://uclcg.github.io/uclcg/demos/cw2_student.uclcg
+https://uclcg.github.io/uclcg/demos/cw1_student.uclcg, CW1, https://uclcg.github.io/uclcg/demos/thumb1.png, CW1-RayTracing, this is a cw1 description, Michael Fischer, false 
+https://uclcg.github.io/uclcg/demos/cw2_student.uclcg, CW2, https://uclcg.github.io/uclcg/demos/thumb1.png, CW2-Rasterization, this is a cw2 description, Michael Fischer, false 
 https://uclcg.github.io/uclcg/demos/cw3_student.uclcg
 blablaTest
