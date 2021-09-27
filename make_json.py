@@ -26,18 +26,13 @@ with open(os.path.join(os.getcwd(), 'pathFile.txt'), 'r') as pathFile:
 
         segs = line.split(',')
 
-        # first segment: jsFile-url
-        with urllib.request.urlopen(segs[0]) as f:
-            contents = f.read().decode('utf-8')
-            print(contents)
-            jsFiles.append(contents)
-
-        categories.append(segs[1].replace(' ', ''))
-        thumb_urls.append(segs[2].replace(' ', ''))
-        niceNames.append(segs[3])
-        shortDescriptions.append(segs[4])
-        authors.append(segs[5].replace(' ', ''))
-        hidden.append(segs[6].strip().replace(' ', ''))
+        jsFiles.append(segs[0].replace(' ', ''))            # jsFile URL
+        categories.append(segs[1].replace(' ', ''))         # tabGroup
+        thumb_urls.append(segs[2].replace(' ', ''))         # thumb url
+        niceNames.append(segs[3])                           # Displayed name
+        shortDescriptions.append(segs[4])                   # caption
+        authors.append(segs[5].replace(' ', ''))            # author - not used
+        hidden.append(segs[6].strip().replace(' ', ''))     # isHidden bool
 
 db = {'jsFiles': jsFiles,
       'categories': categories,

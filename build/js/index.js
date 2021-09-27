@@ -3,21 +3,14 @@ $(document).ready(function () {
     var loadedScript = false;
     var loadSetupButton = function (e) {
 
+        // when loading from URL, jquery returns undefined data due to ajax crossdomain error. must use own repo
+        // cf. https://stackoverflow.com/questions/8035629/jquery-getscript-returns-undefined/8036430
         var tmp = buttonMap[e.currentTarget.id].jsFile.substring(buttonMap[e.currentTarget.id].jsFile);
-        console.log("Loading script:", tmp);    // this is correct! the correct URL
         $.getScript(tmp).done(function (data, textStatus) {
-        console.log("data", data);
-        console.log("textstatus", textStatus);
-        console.log("got into getScript");
             if ($("#setupTabs").data("ui-tabs")) {
-                console.log("got into ifblock");
-                console.log(typeof(data));      // WARN -- data is already undefined here!
                 clear(initFromJS, data, null, null);
             }
         }).fail(function (jqxhr, settings, exception) {
-            console.log("jqhxr", jqxhr);
-            console.log("settings", settings);
-            console.log("exception:", exception);
             alert("This resource has errors and cannot be loaded. Please notify a system administrator");
         });
     }
@@ -47,8 +40,6 @@ $(document).ready(function () {
 
     //Function for clearing on reload
     function clear(callback, jsFileContents, initialResWidth, initialResHeight) {
-        console.log("got into clear");
-        console.log(typeof(jsFileContents));
         //reset app
         resetApp();
         //hide initial UI if necessary
@@ -57,10 +48,8 @@ $(document).ready(function () {
             $("#setupTabs").empty();
             $("#setupIntro").empty();
         }
-        console.log("got after hide initial UI");
         //reset all canvas objects
         clearAllDrawingCanvases();
-        console.log("got after clearAllCanvas");
 
         //remove codemirror instance
         if (UI.codemirrorInstances) {
@@ -68,19 +57,16 @@ $(document).ready(function () {
                 UI.codemirrorInstances[t].toTextArea();
             }
         }
-       console.log("got after codemirror");
 
         if (UI.tabs) {
             $("#implementationTabs").tabs("destroy");
             $("#implementationTabs").empty();
             $("#implementationTabs").append('<ul id="implementationTabsUL"></ul>');
         }
-        console.log("got after uiTabs");
         UI.codemirrorInstances = [];
         UI = {};
         env = {};
         IO = {};
-        console.log("got after inits");
         $("#implementationTabs").tabs({
             create: function (ui, event) {
                 callback(jsFileContents, initialResWidth, initialResHeight);    // initFromJS
@@ -88,7 +74,6 @@ $(document).ready(function () {
             active: 0,
             collapsible: true,
         });
-        console.log("got after implementationTabs jquery");
     }
 
     env = {};
@@ -98,24 +83,19 @@ $(document).ready(function () {
     //FRAMEWORK
     //experiment from js code
     function initFromJS(jsFileContents, initialResWidth, initialResHeight) {
-        console.log("initFromJS1");
 
-        console.log(typeof(jsFileContents));        // WARN -- jsFileContents is undefined??
-        console.log("jsfilecont:", jsFileContents);
         jsFileContents = jsFileContents.replace(`initGL(document.getElementById("glViewport"));`, "");
-        console.log("initFromJS2");
+
         //save file contents for later
         IO.inputFile = jsFileContents;
         //Try appending this file to the DOM
         try {
-            console.log("initFromJS3");
             var s = document.createElement('script');
             s.type = 'text/javascript';
 
             var code = jsFileContents;
             s.appendChild(document.createTextNode(code));
             document.body.appendChild(s);
-            console.log("initFromJS4");
 
         } catch (err) {
             alert("Your experiment template could not be loaded. Error: " + err.message);
@@ -128,7 +108,6 @@ $(document).ready(function () {
             UI.renderWidth = initialResWidth;
             UI.renderHeight = initialResHeight;
         }
-        console.log("initFromJS5");
         //set canvas scale explicitly if defined
         if (UI.renderWidth && UI.renderHeight) {
             canvas = $("#glRenderTarget").get(0);
@@ -137,7 +116,6 @@ $(document).ready(function () {
             initGL($("#glRenderTarget").get(0));
             $("#currentResolution").val(canvas.width + "x" + canvas.height);
         }
-        console.log("initFromJS6");
         //set frames if not available
         if (!UI.numFrames) {
             UI.numFrames = 1000;
@@ -151,7 +129,6 @@ $(document).ready(function () {
         //set this to false at the start
         UI.showHidden = false;
         UI.codemirrorInstances = [];
-        console.log("initFromJS7");
         //Setup the UI as appropriate
         //page title
         $("#mainTitle").text("UCL Computer Graphics - " + UI.titleLong);
@@ -530,15 +507,16 @@ $(document).ready(function () {
     });*/
 
     // from url doesnt work bc of CORS error --> must be github.io url !!
-//    var scriptPath = 'https://uclcg.github.io/uclcg/demos/cw1_student.uclcg'        // must read from github.io address, or else get CORS error
-//    var scriptPath = 'https://mfischer-ucl.github.io/uclcg/demos/cw1_student.uclcg'        // must read from github.io address, or else get CORS error
-//    console.log(scriptPath);
-//    fetch(scriptPath).then(res => res.blob()).then(blob => {
-//        var file = new File([blob], blob);
-//        console.log(file);
-//        loadjsfile(file);
-//    });
+    // from diff. repo URL works with fetch api, but not with jquery?
+    // init with single, pre-pulled file (no tabGroups):
+    /*
+    var scriptPath = 'https://uclcg.github.io/uclcg/demos/cw1_student.uclcg'
+    fetch(scriptPath).then(res => res.blob()).then(blob => {
+        var file = new File([blob], blob);
+        loadjsfile(file);
+    });*/
 
+    // replicate old database item
     class Setup {
         constructor(jsFile, category, picture, niceName, shortDescription, author, hidden) {
             this.jsFile = jsFile;
@@ -567,7 +545,6 @@ $(document).ready(function () {
         xhr.send();
     };
 
-
     getJSON('https://uclcg.github.io/uclcg/demos/db.json', function(err, data) {
         if (err !== null) {
             alert('Something went wrong: ' + err);
@@ -579,40 +556,23 @@ $(document).ready(function () {
             var isHidden = (data.hidden[i] === 'true');
                 var s = new Setup(data.jsFiles[i], data.categories[i], data.pictures[i], data.niceNames[i], data.shortDescriptions[i], data.authors[i], isHidden);
                 s._id = i;
-                s.jsFile = 'https://uclcg.github.io/uclcg/demos/cw1_student.uclcg';
                 setups.push(s);
         }
 
         // all setups read and created, the rest is display stuff, copied from above!
-        console.log("Created", setups.length, "setups. Displaying them now");
-
-        for(var i = 0; i < setups.length; ++i) {
-            //console.log(setups[i]);
-            if (setups[i].niceName == 'Coursework 1 - 2021/22') {
-                console.log(setups[i].jsFile);
-            }
-            console.log("setup", setups[i]._id, '  ', i, setups[i].hidden);
-        }
 
         tabbedSetups = [];
         for (var s = 0; s < setups.length; ++s) {
 
             if (!setups[s].hidden) {
-                console.log("setup", s, "hidden = false");      // should be called 6 times
                 // add empty list if category doesnt exist yet
                 if (!tabbedSetups[setups[s].category]) {
-                    console.log("setup", s, "innerloop");           // should be called 2 times
                     tabbedSetups[setups[s].category] = [];
                 }
                 tabbedSetups[setups[s].category].push(setups[s]);
-                console.log("pushed setup");
             }
         }
 
-        console.log('TabbedSetupsLength:', tabbedSetups.length)
-        for(var i = 0; i < tabbedSetups.length; i++){
-            console.log("TabbedSetupCategories:", tabbedSetups[i]);
-        }
         //remember for delete button callbacks
         buttonMap = [];
 
@@ -654,123 +614,4 @@ $(document).ready(function () {
         $("#setupTabs").tabs();
 
     });
-
-
-    // nested json must directly contain all the info! --> straight string, not just url
-    // the pathFile contains all info about the cw files that must be display on the welcome page.
-    // each line contain (comma-separated):
-    // uclcg-url, category, thumbnail-url, cw_name, shortDescription, author, isHidden
-    // the following code reads the pathFile, and processes each line sequentially, splits it into parts, and creates
-    // a "setup" object that resembles the content of the database the old system used. the setup objects are then
-    // passed to a display-routine (copied from old version, see above).
-
-
-    /*var filePath = 'https://uclcg.github.io/uclcg/pathFile.txt'
-    fetch(filePath).then(res => res.blob()).then(blob => {
-        var file = new File([blob], blob);
-        var read = new FileReader();
-        read.readAsBinaryString(file);
-
-        var setups = [];
-        read.onloadend = function(){
-            var lines = read.result.split('\n');             // per-line in pathFile.txt: cw info
-            for(var i = 0; i < lines.length - 1; i++) {		 // len -1 bc we dont need the last newline char
-
-                parts = lines[i].split(',');                 // get comma-separated info
-            	if(parts.length == 7) {                      // if info complete, build setup from that file
-
-                    // get jsFile contents
-                    var jsFile = null;
-                    fetch(parts[0]).then(res => res.blob()).then(blob => {      // parts[0] is the .uclcg path
-                        var file = new File([blob], blob);
-                        var read = new FileReader();
-                        read.onloadend = function() {
-                            jsFile = read.result;
-                        }
-                        read.readAsBinaryString(file);
-                    });
-
-                    // get corresponding picture
-                    var pic = null;
-                    fetch(parts[2]).then(res => res.blob()).then(blob => {      // parts[2] is the picture path
-                        var file = new File([blob], blob);
-                        var read = new FileReader();
-                        read.onloadend = function() {
-                            pic = read.result;
-                        }
-                        read.readAsBinaryString(file);
-                    });
-
-                    // cast hidden-string to bool, create setup object, append to setups list:
-                    var isHidden = (parts[6] === 'true');
-                    var s = new Setup(jsFile, parts[1], pic, parts[3], parts[4], parts[5], isHidden);
-                    setups.push(s);
-
-            	} else {
-            	    console.log("Not enough info - expected 7 values but received", parts.length);
-            	}
-            }
-
-            // all setups read and created, the rest is display stuff, copied from above!
-            console.log("Created", setups.length, "setups. Displaying them now");
-
-            tabbedSetups = [];
-            for (var s = 0; s < setups.length; ++s) {
-
-                if (!setups[s].hidden) {
-
-                    // add empty list if category doesnt exist yet
-                    if (!tabbedSetups[setups[s].category]) {
-                        tabbedSetups[setups[s].category] = [];
-                    }
-                    tabbedSetups[setups[s].category].push(setups[s]);
-                }
-            }
-
-            console.log('TabbedSetupsLength:', tabbedSetups.length)
-            for(var i = 0; i < tabbedSetups.length; i++){
-                console.log("TabbedSetupCategories:", tabbedSetups[i]);
-            }
-            //remember for delete button callbacks
-            buttonMap = [];
-
-            var tabIdx = 0;
-            Object.keys(tabbedSetups).forEach(function (key) {
-                var lSetups = tabbedSetups[key];
-
-                //Initial UL
-                $("div#setupTabs ul").append(
-                    "<li><a href='#setupTabs-" + tabIdx + "'>" + key + "</a></li>"
-                );
-                //Tab Detail
-                $("div#setupTabs").append(
-                    `<div id="setupTabs-` + tabIdx + `"></div>`
-                );
-                //add content
-                var liDiv = $(`#setupTabs-` + tabIdx);
-                liDiv.append("<div id=\"setupRow-" + key + "\"class=\"row display-flex\"></div>");
-                for (var i = 0; i < lSetups.length; ++i) {
-                    var parentRow = $("#setupRow-" + key);
-                    var pic = lSetups[i].picture
-                    var picIdx = lSetups[i].picture.lastIndexOf("/");
-                    parentRow.append(`<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-                                            <div class=" thumbnail">
-                                                <a id="` + key + `_load_` + i + `" href="#" class="loadButton">
-                                                <img src="` + pic.substring(0, picIdx + 1) + pic.substring(picIdx + 1) + `" alt="...">
-                                                </a>
-                                                <div class="caption">
-                                                    <h3>` + lSetups[i].niceName + `</h3>
-                                                    <p>` + lSetups[i].shortDescription + `</p>
-                                                </div>
-                                           </div>
-                                          </div>`);
-                    buttonMap[key + "_load_" + i] = {id: lSetups[i]._id, jsFile: lSetups[i].jsFile};
-                    $('.loadButton').on('click', loadSetupButton);
-                }
-                tabIdx += 1;
-            });
-            $("#setupTabs").tabs();
-
-        }
-    });*/
 });
