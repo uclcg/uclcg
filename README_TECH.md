@@ -95,3 +95,7 @@ where `tabgroup` is the name of the tab-supergroup (eg., Demos, Coursework), `na
 (eg., Coursework 1) and `isHidden` is a `js bool` (`true/false`) indicating whether the file should be loaded. 
 Currently, both `.urls` must be hosted by `github.io` to avoid `CORS errors` when fetching their content via URL requests (TODO?). 
 
+## TODOs: 
+- Add Github Actions, such that: the repository is monitored, and stuff happens on push/pull actions. Ideally: whenever
+  a new file is pushed to the CW repository, we would run make_json.py update the db.json, which in turn creates a db.json
+  object in said repo, which is then read by the system and transformed into tabgroups and tabs. 
