@@ -1,0 +1,257 @@
+function setup()
+{
+	UI = {};
+	UI.tabs = [];
+	UI.titleLong = 'Simple Camera';
+	UI.titleShort = 'cameraSimple';
+	UI.numFrames = 1000;
+	UI.maxFPS = 24;
+	UI.tabs.push(
+		{
+		visible: true,
+		type: `x-shader/x-fragment`,
+		title: `Ray Generation`,
+		id: `RaytracingDemoFS`,
+		initialValue: `precision highp float;
+
+struct Ray {
+  vec3 origin;
+  vec3 direction;
+};
+
+struct Sphere {
+  vec3 position;
+  float radius;
+};
+
+uniform vec2 g_resolution;
+
+bool intersectSphere(const Sphere sphere, const Ray ray) {
+  vec3 toOrigin = ray.origin - sphere.position;
+  float a = dot(ray.direction, ray.direction);
+  float b = 2.0 * dot(toOrigin, ray.direction);
+  float c = dot(toOrigin, toOrigin) - sphere.radius * sphere.radius;
+  float discriminant = b * b - 4.0 * a * c;
+
+  if(discriminant < 0.0) return false;
+
+  float t0 = (-b - sqrt(discriminant)) / (2.0 * a);
+  float t1 = (-b + sqrt(discriminant)) / (2.0 * a);
+
+  return t0 > 0.0 || t1 > 0.0;
+}
+
+vec3 simpleCamera(const ivec2 pixelCoord) {
+  const int sphereCount = 2;
+
+  // Array of spheres
+  Sphere spheres[sphereCount];
+
+  // Initialize first sphere
+  spheres[0].position = vec3(0, -2, -10);
+  spheres[0].radius = 3.0;
+  // Initialize second sphere
+  spheres[1].position = vec3(3, -1, -5);
+  spheres[1].radius = 1.0;
+
+  float d = 1.0;
+
+  // Initialize a ray
+  Ray ray;
+  ray.origin = vec3(0, 0, d);
+
+  // Construct ray direction
+  vec2 windowMin = vec2(-0.5,-0.5);
+  vec2 windowMax = vec2(0.5,0.5);
+  float width = (windowMax.x - windowMin.x) / g_resolution.x;
+  float height = (windowMax.y - windowMin.y) / g_resolution.y;
+  // Do not need to add 0.5, gl_FragCoord contains pixel centers
+  ray.direction = vec3( windowMin.x + width * gl_FragCoord.x,
+                       	windowMin.y + height * gl_FragCoord.y,
+                        -d);
+
+  // Correct for window aspect ratio
+  float aspect = g_resolution.x / g_resolution.y;
+  ray.direction = ray.direction * vec3(aspect,1,1);
+
+  // Visualize the direction as a color
+  // return ray.direction;
+
+  // Loop over all spheres
+  for(int i = 0; i < sphereCount; i++) {
+    // Test for intersection
+    if(intersectSphere(spheres[i], ray)) {
+      // Mark as white if it intersects
+      return vec3(1);
+    }
+  }
+  return vec3(0);
+}
+
+void main() {
+  gl_FragColor = vec4(simpleCamera(ivec2(gl_FragCoord.xy)), 1);
+}`,
+		description: ``,
+		wrapFunctionStart: ``,
+		wrapFunctionEnd: ``
+	});
+
+	UI.tabs.push(
+		{
+		visible: false,
+		type: `x-shader/x-vertex`,
+		title: `Something we would not like to see`,
+		id: `RaytracingDemoVS`,
+		initialValue: ` attribute vec3 position;
+    uniform mat4 modelViewMatrix;
+    uniform mat4 projectionMatrix;
+    void main(void) {
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }`,
+		description: ``,
+		wrapFunctionStart: ``,
+		wrapFunctionEnd: ``
+	});
+
+	 return UI; 
+}//!setup
+
+var gl;
+function initGL(canvas) {
+	try {
+		gl = canvas.getContext("webgl");
+		gl.viewportWidth = canvas.width;
+		gl.viewportHeight = canvas.height;
+	} catch (e) {
+	}
+	if (!gl) {
+		alert("Could not initialise WebGL, sorry :-(");
+	}
+}
+
+function getShader(gl, id) {
+	var shaderScript = document.getElementById(id);
+	if (!shaderScript) {
+		return null;
+	}
+
+	var str = "";
+	var k = shaderScript.firstChild;
+	while (k) {
+		if (k.nodeType == 3) {
+			str += k.textContent;
+		}
+		k = k.nextSibling;
+	}
+
+	var shader;
+	if (shaderScript.type == "x-shader/x-fragment") {
+		shader = gl.createShader(gl.FRAGMENT_SHADER);
+	} else if (shaderScript.type == "x-shader/x-vertex") {
+		shader = gl.createShader(gl.VERTEX_SHADER);
+	} else {
+		return null;
+	}
+
+	gl.shaderSource(shader, str);
+	gl.compileShader(shader);
+
+	if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+		alert(gl.getShaderInfoLog(shader));
+		return null;
+	}
+
+	return shader;
+}
+
+function RaytracingDemo() {
+}
+
+RaytracingDemo.prototype.initShaders = function() {
+
+	this.shaderProgram = gl.createProgram();
+
+	gl.attachShader(this.shaderProgram, getShader(gl, "RaytracingDemoVS"));
+	gl.attachShader(this.shaderProgram, getShader(gl, "RaytracingDemoFS"));
+	gl.linkProgram(this.shaderProgram);
+
+	if (!gl.getProgramParameter(this.shaderProgram, gl.LINK_STATUS)) {
+		alert("Could not initialise shaders");
+	}
+
+	gl.useProgram(this.shaderProgram);
+
+	this.shaderProgram.vertexPositionAttribute = gl.getAttribLocation(this.shaderProgram, "position");
+	gl.enableVertexAttribArray(this.shaderProgram.vertexPositionAttribute);
+
+	this.shaderProgram.projectionMatrixUniform = gl.getUniformLocation(this.shaderProgram, "projectionMatrix");
+    this.shaderProgram.modelviewMatrixUniform = gl.getUniformLocation(this.shaderProgram, "modelViewMatrix");
+
+    // Add resolution uniform
+    gl.uniform2f(
+		gl.getUniformLocation(this.shaderProgram, "g_resolution"),
+		getRenderTargetWidth(),
+		getRenderTargetHeight());
+}
+
+RaytracingDemo.prototype.initBuffers = function() {
+	this.triangleVertexPositionBuffer = gl.createBuffer();
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.triangleVertexPositionBuffer);
+
+	var vertices = [
+		 -1,  -1,  0,
+		 -1,  1,  0,
+		 1,  1,  0,
+
+		 -1,  -1,  0,
+		 1,  -1,  0,
+		 1,  1,  0,
+	 ];
+	gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+	this.triangleVertexPositionBuffer.itemSize = 3;
+	this.triangleVertexPositionBuffer.numItems = 3 * 2;
+}
+
+RaytracingDemo.prototype.drawScene = function() {
+
+	var perspectiveMatrix = new J3DIMatrix4();
+	perspectiveMatrix.setUniform(gl, this.shaderProgram.projectionMatrixUniform, false);
+
+	var modelViewMatrix = new J3DIMatrix4();
+	modelViewMatrix.setUniform(gl, this.shaderProgram.modelviewMatrixUniform, false);
+
+	gl.bindBuffer(gl.ARRAY_BUFFER, this.triangleVertexPositionBuffer);
+	gl.vertexAttribPointer(this.shaderProgram.vertexPositionAttribute, this.triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+
+	gl.drawArrays(gl.TRIANGLES, 0, this.triangleVertexPositionBuffer.numItems);
+}
+
+RaytracingDemo.prototype.run = function() {
+	this.initShaders();
+	this.initBuffers();
+
+	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+	gl.clear(gl.COLOR_BUFFER_BIT);
+
+	this.drawScene();
+};
+
+function init() {
+
+
+	env = new RaytracingDemo();
+	env.run();
+
+    return env;
+}
+
+function compute(canvas)
+{
+    env.initShaders();
+    env.initBuffers();
+
+    gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    env.drawScene();
+}

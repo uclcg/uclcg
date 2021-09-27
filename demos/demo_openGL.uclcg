@@ -1,0 +1,561 @@
+function setup()
+{
+	UI = {};
+	UI.tabs = [];
+	UI.titleLong = 'OpenGL';
+	UI.titleShort = 'openGL';
+	UI.numFrames = 1000;
+	UI.maxFPS = 24;
+	UI.tabs.push(
+		{
+		visible: true,
+		type: `x-shader/x-fragment`,
+		title: `Fragment Program`,
+		id: `OpenGLDemoFS`,
+		initialValue: `precision highp float;
+
+// Incoming from the vertex shader
+varying vec3 fragColor;
+varying vec3 fragNormal;
+varying vec3 fragPosition;
+varying vec2 fragTexCoord;
+varying vec3 cameraPosition;
+
+uniform sampler2D testTexture;
+
+void main() {
+
+  // Light parameters
+  vec3 ambientLightColor = vec3(0.2, 0.2, 0.3);
+  vec3 lightPosition = vec3(0.0, 16.0, -30.0);
+  vec3 lightColor = vec3(1.0, 0.8, 0.9);
+
+  // Material parameters
+  vec3 materialKa = fragColor;
+  vec3 materialKd = vec3(1.0, 1.0, 1.0) * fragColor;
+  vec3 materialKs = vec3(0.8, 0.8, 0.8);
+  float materialGlossiness = 20.0;
+
+  // Articulate material parameters by textures
+  //vec3 textureColor =  texture2D(testTexture, fragTexCoord).rgb;
+  //materialKa *= textureColor;
+  //materialKd *= textureColor;
+  //materialKs *= textureColor;
+
+  // Directions used for shading
+  vec3 L = normalize(lightPosition.xyz - fragPosition.xyz);
+  vec3 E = normalize(cameraPosition - fragPosition.xyz);
+  vec3 R = normalize(-reflect(L, fragNormal.xyz));
+
+  // Phong, written as diffuse and specular reflectance
+  vec3 diffuseReflectance = materialKd * max(dot(fragNormal.xyz, L), 0.0);
+  vec3 specularReflectance = materialKs * pow(max(dot(R, E), 0.0), materialGlossiness);
+
+  // Incoming light times reflectance is outgoing light, also add some ambient
+  vec3 color =
+    ambientLightColor * materialKa +
+    lightColor * (diffuseReflectance + specularReflectance);
+
+  gl_FragColor = vec4(color, 1.0);
+
+  // Visualize the tex coord
+  //gl_FragColor = vec4(fragTexCoord, 0, 1);
+
+  // Use texture
+  //gl_FragColor = vec4(texture2D(testTexture, fragTexCoord).rgb, 1);
+}`,
+		description: ``,
+		wrapFunctionStart: ``,
+		wrapFunctionEnd: ``
+	});
+
+	UI.tabs.push(
+		{
+		visible: true,
+		type: `x-shader/x-vertex`,
+		title: `Vertex Program`,
+		id: `OpenGLDemoVS`,
+		initialValue: `// Incoming from the array buffers
+attribute vec3 position;
+attribute vec3 color;
+attribute vec3 normal;
+attribute vec2 texCoord;
+
+// Outgoing to the fragment program
+varying vec3 fragColor;
+varying vec3 fragNormal;
+varying vec3 fragPosition;
+varying vec2 fragTexCoord;
+varying vec3 cameraPosition;
+
+// The current time value, set in the rick() of the JS code
+uniform float time;
+
+mat4 computeProjectionMatrix(float fov, float aspect, float zNear, float zFar) {
+
+	float deltaZ = zFar - zNear;
+	float cotangent = cos(fov * 0.5) / sin(fov * 0.5);
+
+  	mat4 projectionMatrix;
+  	projectionMatrix[0] = vec4(cotangent / aspect, 0.0, 0.0, 0.0);
+	projectionMatrix[1] = vec4(0.0, cotangent, 0.0, 0.0);
+	projectionMatrix[2] = vec4(0.0, 0.0, -(zFar + zNear) / deltaZ, -1.0);
+	projectionMatrix[3] = vec4(0.0, 0.0, -2.0 * zNear * zFar / deltaZ, 0.0);
+
+	return projectionMatrix;
+}
+
+// Used to generate a simple "look-at" camera.
+mat4 computeViewMatrix(vec3 VRP, vec3 TP, vec3 VUV) {
+  	// The VPN is pointing away from the TP. Can also be modeled the other way around.
+  	vec3 VPN = VRP - TP;
+  	// Generate the camera axes.
+    vec3 n = normalize(VPN);
+    vec3 u = normalize(cross(VUV, n));
+    vec3 v = normalize(cross(n, u));
+
+	mat4 modelViewMatrix;
+	modelViewMatrix[0] = vec4(u[0], v[0], n[0], 0);
+	modelViewMatrix[1] = vec4(u[1], v[1], n[1], 0);
+	modelViewMatrix[2] = vec4(u[2], v[2], n[2], 0);
+	modelViewMatrix[3] = vec4(- dot(VRP, u), - dot(VRP, v), - dot(VRP, n), 1);
+
+  	return modelViewMatrix;
+}
+
+void main(void) {
+  // Animate the camera position using a uniform variable
+  cameraPosition = 5.0 * vec3(sin(time), 0, cos(time)) + vec3(0, 3.0, 0);
+
+  // Animate each vertex position
+  vec3 position2 = position +
+    0.0 * 0.2 * vec3(
+      sin(0.4 * position.x + time * 0.5),
+      cos(0.6 * position.x + time * 0.2),
+      sin(0.8 * position.x + time * 0.3)
+    );
+
+  // Set the parameters for the look-at camera.
+  vec3 TP = vec3(0, 0, 0);
+  vec3 VRP = cameraPosition;
+  vec3 VUV = vec3(0, 1, 0);
+
+  // Compute the view matrix (covered in the slides).
+  mat4 viewMatrix = computeViewMatrix(VRP, TP, VUV);
+
+  // Compute the projection matrix. NOTE: this is not covered in general camera slides.
+  mat4 projectionMatrix = computeProjectionMatrix(0.6, 2.0, 0.5, 200.0);
+
+  // A vertex shader *must* write to this value, otherwise the vertex wil not know where to go on screen
+  gl_Position = projectionMatrix * viewMatrix * vec4(position2, 1.0);
+
+  // Pass on information to the fragment program
+  fragColor = color;
+  fragNormal = normal;
+  fragPosition = position;
+  fragTexCoord = texCoord;
+}`,
+		description: ``,
+		wrapFunctionStart: ``,
+		wrapFunctionEnd: ``
+	});
+
+	UI.tabs.push(
+		{
+		visible: true,
+		type: `text/javascript`,
+		title: `OpenGL`,
+		id: `DemoJS`,
+		initialValue: `function getVertices() {
+  var size = 1.0;
+  return [
+    // Front face
+    -size, -size,  -size,
+    +size, -size,  -size,
+    +size, +size,  -size,
+    -size, +size,  -size,
+
+    // Back face
+    -size, -size, +size,
+    -size, +size, +size,
+    +size, +size, +size,
+    +size, -size, +size,
+
+    // Front face
+    -size, -size,  -size,
+    +size, -size,  -size,
+    +size, -size,  +size,
+    -size, -size,  +size,
+
+    // Back face
+    -size, +size, -size,
+    -size, +size, +size,
+    +size, +size, +size,
+    +size, +size, -size,
+
+    // Front face
+    -size, -size,  -size,
+    -size, -size,  +size,
+    -size, +size,  +size,
+    -size, +size,  -size,
+
+    // Back face
+    +size, -size, +size,
+    +size, +size, +size,
+    +size, +size, -size,
+    +size, -size, -size,
+  ];
+}
+
+function getColors() {
+ return [
+   // Front face
+   1.0, 0.7, 0.0,
+   1.0, 0.7, 0.0,
+   1.0, 0.7, 0.0,
+   1.0, 0.7, 0.0,
+   // Back face
+   0.0, 1.0, 0.2,
+   0.0, 1.0, 0.2,
+   0.0, 1.0, 0.2,
+   0.0, 1.0, 0.2,
+   // Top face
+   0.4, 0.1, 1.0,
+   0.4, 0.1, 1.0,
+   0.4, 0.1, 1.0,
+   0.4, 0.1, 1.0,
+   // Bottom fac
+   1.0, 0.6, 0.3,
+   1.0, 0.6, 0.3,
+   1.0, 0.6, 0.3,
+   1.0, 0.6, 0.3,
+   // Right
+   0.0, 0.7, 1.0,
+   0.0, 0.7, 1.0,
+   0.0, 0.7, 1.0,
+   0.0, 0.7, 1.0,
+   // Left
+   1.0, 0.0, 1.0,
+   1.0, 0.0, 1.0,
+   1.0, 0.0, 1.0,
+   1.0, 0.0, 1.0
+ ];
+}
+
+function getNormals() {
+    return [
+      // Front face
+      0.0, 0.0, 1.0,
+      0.0, 0.0, 1.0,
+      0.0, 0.0, 1.0,
+      0.0, 0.0, 1.0,
+      // Back face
+      0.0, 0.0, -1.0,
+      0.0, 0.0, -1.0,
+      0.0, 0.0, -1.0,
+      0.0, 0.0, -1.0,
+      // Top face
+      0.0, 1.0, 0.0,
+      0.0, 1.0, 0.0,
+      0.0, 1.0, 0.0,
+      0.0, 1.0, 0.0,
+      // Bottom face
+      0.0, -1.0, 0.0,
+      0.0, -1.0, 0.0,
+      0.0, -1.0, 0.0,
+      0.0, -1.0, 0.0,
+      // Right
+      1.0, 0.0, 0.0,
+      1.0, 0.0, 0.0,
+      1.0, 0.0, 0.0,
+      1.0, 0.0, 0.0,
+      // Left
+      -1.0, 0.0, 0.0,
+      -1.0, 0.0, 0.0,
+      -1.0, 0.0, 0.0,
+      -1.0, 0.0, 0.0
+    ];
+}
+
+function getTexCoords() {
+return [
+      // Front face
+      0.0, 0.0,
+      1.0, 0.0,
+      1.0, 1.0,
+      0.0, 1.0,
+
+      // Back face
+      1.0, 0.0,
+      1.0, 1.0,
+      0.0, 1.0,
+      0.0, 0.0,
+
+      // Top face
+      0.0, 1.0,
+      0.0, 0.0,
+      1.0, 0.0,
+      1.0, 1.0,
+
+      // Bottom face
+      1.0, 1.0,
+      0.0, 1.0,
+      0.0, 0.0,
+      1.0, 0.0,
+
+      // Right face
+      1.0, 0.0,
+      1.0, 1.0,
+      0.0, 1.0,
+      0.0, 0.0,
+
+      // Left face
+      0.0, 0.0,
+      1.0, 0.0,
+      1.0, 1.0,
+      0.0, 1.0,
+    ];
+}
+
+function getIndices() {
+    return [
+      2, 1, 0,      3, 2, 0,    // Front face
+      6, 5, 4,      7, 6, 4,    // Back face
+      8, 9, 10,     8, 10, 11,  // Top face
+      12, 13, 14,   12, 14, 15, // Bottom face
+      16, 17, 18,   16, 18, 19, // Right face
+      22, 21, 20,   23, 22, 20  // Left face
+    ];
+}
+
+function loadShaders() {
+  shaderProgram = gl.createProgram();
+
+  gl.attachShader(shaderProgram, getShader(gl, "OpenGLDemoVS"));
+  gl.attachShader(shaderProgram, getShader(gl, "OpenGLDemoFS"));
+  gl.linkProgram(shaderProgram);
+
+  if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+    alert("Could not initialise shaders");
+  }
+
+  gl.useProgram(shaderProgram);
+}
+
+function loadGeometry() {
+  // Positions
+  positionBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(getVertices()), gl.STATIC_DRAW);
+  gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+  var positionAttributeLocation = gl.getAttribLocation(shaderProgram, "position");
+  gl.enableVertexAttribArray(positionAttributeLocation);
+  gl.vertexAttribPointer(positionAttributeLocation, 3, gl.FLOAT, false,  0,   0);
+
+  // Colors
+  colorBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(getColors()), gl.STATIC_DRAW);
+  gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+  var colorAttributeLocation = gl.getAttribLocation(shaderProgram, "color");
+  gl.enableVertexAttribArray(colorAttributeLocation);
+  gl.vertexAttribPointer(colorAttributeLocation, 3, gl.FLOAT, false, 0, 0);
+
+  // Normals
+  normalBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(getNormals()), gl.STATIC_DRAW);
+  gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+  var normalAttributeLocation = gl.getAttribLocation(shaderProgram, "normal");
+  gl.enableVertexAttribArray(normalAttributeLocation);
+  gl.vertexAttribPointer(normalAttributeLocation, 3, gl.FLOAT,  false,  0,  0);
+
+  // Texture Coords (UVs)
+  texCoordBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(getTexCoords()), gl.STATIC_DRAW);
+  gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer);
+  var texCoordAttributeLocation = gl.getAttribLocation(shaderProgram, "texCoord");
+  gl.enableVertexAttribArray(texCoordAttributeLocation);
+  gl.vertexAttribPointer(texCoordAttributeLocation, 2, gl.FLOAT,  false,  0,  0);
+
+  // Indices
+  triangleBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, triangleBuffer);
+  gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(getIndices()), gl.STATIC_DRAW);
+  triangleBuffer.itemSize = 1;
+  triangleBuffer.numItems = 2 * 3 * 6;
+}
+
+function draw() {
+
+  gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+
+  gl.clearColor(0.3, 0.3, 0.3, 1.0);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+  //gl.disable(gl.DEPTH_TEST);
+  gl.enable(gl.DEPTH_TEST);
+
+  gl.disable(gl.CULL_FACE);
+  //gl.enable(gl.CULL_FACE);
+
+  gl.cullFace(gl.BACK);
+  //gl.cullFace(gl.FRONT);
+
+  gl.disable(gl.BLEND);
+  //gl.enable(gl.BLEND);
+
+  gl.blendFunc(gl.ONE, gl.ONE);
+
+  // Use the texture "texture"
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+
+  // Update the uniform variable "time" with the current time
+  // getTime is implemented by our framework and returns time in milliseconds
+  gl.uniform1f(gl.getUniformLocation(shaderProgram, "time"), getTime());
+
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, triangleBuffer);
+  gl.drawElements(gl.TRIANGLES, triangleBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+}
+
+// This function is caled once the image finished loading
+function handleLoadedTexture(texture) {
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, texture.image);
+  gl.generateMipmap(gl.TEXTURE_2D);
+  gl.bindTexture(gl.TEXTURE_2D, null);
+}
+
+function loadTexture() {
+  gl.enable(gl.TEXTURE_2D);
+  texture  = gl.createTexture();
+
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  // Linear filtering
+  //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+  // MIP  filtering
+  //gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+
+  // Load texture from memory
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 2, 2, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([
+    10, 50, 200, 255,
+    10, 100, 50, 255,
+    10, 20, 30, 255,
+    200, 50, 100, 255,
+  ]));
+
+  // Load texture.
+  // .image is a HTML image we add to the variable to be used once it had finished loading
+  texture.image = new Image();
+  texture.image.onload = function() {
+    handleLoadedTexture(texture);
+  }
+  //texture.image.src = "http://cg.cs.ucl.ac.uk/images/texture.jpg";
+}
+
+function tick() {
+  // Draw the scene
+  draw();
+
+  // Requests this function to be called on the next possible occasion
+  // This is a HTML function, not anything WebGL-specific
+  requestAnimationFrame(tick);
+}
+
+// Initialization
+loadShaders();
+loadGeometry();
+loadTexture();
+
+// Request to tick. tick() itself will ask HTML to be called again
+if (!tickHasBeenCalled) {
+	tickHasBeenCalled = true;
+	tick();
+}
+`,
+		description: ``,
+		wrapFunctionStart: ``,
+		wrapFunctionEnd: ``
+	});
+
+	 return UI; 
+}//!setup
+
+var gl;
+function initGL(canvas) {
+	try {
+		gl = canvas.getContext("webgl");
+		gl.viewportWidth = canvas.width;
+		gl.viewportHeight = canvas.height;
+	} catch (e) {
+	}
+	if (!gl) {
+		alert("Could not initialise WebGL, sorry :-(");
+	}
+}
+
+function getShader(gl, id) {
+	var shaderScript = document.getElementById(id);
+	if (!shaderScript) {
+		return null;
+	}
+
+	var str = "";
+	var k = shaderScript.firstChild;
+	while (k) {
+		if (k.nodeType == 3) {
+			str += k.textContent;
+		}
+		k = k.nextSibling;
+	}
+
+	var shader;
+	if (shaderScript.type == "x-shader/x-fragment") {
+		shader = gl.createShader(gl.FRAGMENT_SHADER);
+	} else if (shaderScript.type == "x-shader/x-vertex") {
+		shader = gl.createShader(gl.VERTEX_SHADER);
+	} else {
+		return null;
+	}
+
+	gl.shaderSource(shader, str);
+	gl.compileShader(shader);
+
+	if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+		alert(gl.getShaderInfoLog(shader));
+		return null;
+	}
+
+	return shader;
+}
+
+function RaytracingDemo() {
+}
+
+function evalJS(id) {
+
+	try {
+		eval(document.getElementById(id).innerHTML);
+	} catch (e) {
+			alert(e.message);
+	}
+}
+
+var count = 0;
+function getTime() {
+var d = new Date();
+return d.getMinutes() * 60.0 + d.getSeconds() + d.getMilliseconds() / 1000.0;
+}
+
+var tickHasBeenCalled = false;
+function init() {
+}
+
+function compute(canvas) {
+	evalJS("DemoJS");
+}
