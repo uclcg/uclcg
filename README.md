@@ -4,11 +4,11 @@
 
 This website hosts the [UCL Computer Graphics rendering system](https://uclcg.github.io/uclcg/public/html/index.html). 
 The system implements an online framework for executing WebGL code and for 
-implementing and the coursework and assignments. Please have a look at the submission info below. 
+implementing the coursework and assignments. Please have a look at the submission info below. 
 
 ## Get Started  
 
-To get started, please have a look at the [WebGL spec](https://www.khronos.org/registry/webgl/specs/latest/1.0/)
+To get started, please familiarize yourself with the [WebGL spec](https://www.khronos.org/registry/webgl/specs/latest/1.0/)
 and the OpenGL ES Shading Language [GLSL](https://www.khronos.org/files/opengles_shading_language.pdf).
 We have prepared three simple demo scripts ([demo1](demos/cameraSimple.uclcg), [demo2](demos/openGL.uclcg), [demo3](demos/splines.uclcg)) to help you get started.
 You can look at and play with the code to get a feel for the system and for graphics programming. 
