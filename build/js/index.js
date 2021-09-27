@@ -5,8 +5,8 @@ $(document).ready(function () {
 
         // when loading from URL, jquery returns undefined data due to ajax crossdomain error. must use own repo
         // cf. https://stackoverflow.com/questions/8035629/jquery-getscript-returns-undefined/8036430
-        var tmp = buttonMap[e.currentTarget.id].jsFile.substring(buttonMap[e.currentTarget.id].jsFile);
-        $.getScript(tmp).done(function (data, textStatus) {
+        var scriptURL = buttonMap[e.currentTarget.id].jsFile.substring(buttonMap[e.currentTarget.id].jsFile);
+        $.getScript(scriptURL).done(function (data, textStatus) {
             if ($("#setupTabs").data("ui-tabs")) {
                 clear(initFromJS, data, null, null);
             }

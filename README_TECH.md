@@ -69,7 +69,18 @@ After that, call
 ```
 python sanitize.py  
 ```
-to modify the path variables in `index.html`. You can then proceed to push to Github. Note that it might take some time (~2-5 min) for the changes to be shown on the live website.
+to modify the path variables in `index.html`. You can then proceed to push to Github. Note that it might take some 
+time (~2-5 min) for the changes to be shown on the live website. 
+
+Notes: 
+- If you're simultaneously running a local version 
+on `localhost:80xx`, running `sanitize.py` is going to break it, as the path names will be changed. Simply run `grunt` once more after 
+pushing, to have the local server work again.
+- The `localhost` version currently cannot display the tabgroups and images. This is due to jQuerys inability of fetching
+   cross-domain content, cf. [this](https://stackoverflow.com/questions/8035629/jquery-getscript-returns-undefined/8036430) question. 
+   This can be solved by changing the variable `scriptPath` to the local, relative path of the `.uclcg` files, which in
+   turn will break the working github-pages version, when pushed. 
+
 
 ### Initial github-pages setup
 If you push to a new repository that is not yet configured to serve a github webpage, the following step needs to be executed once. 
@@ -82,5 +93,5 @@ The file contains the info about the current coursework in CSV format. The forma
 `.uclcg-url, tabgroup, thumbnail-url, name, shortdescription, author, isHidden` <br> 
 where `tabgroup` is the name of the tab-supergroup (eg., Demos, Coursework), `name` is the filename that is to be displayed
 (eg., Coursework 1) and `isHidden` is a `js bool` (`true/false`) indicating whether the file should be loaded. 
-Currently, both `.urls` must be hosted by `github.io` to avoid `CORS errors` when loading their content (TODO?). 
+Currently, both `.urls` must be hosted by `github.io` to avoid `CORS errors` when fetching their content via URL requests (TODO?). 
 
