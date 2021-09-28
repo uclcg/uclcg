@@ -6,6 +6,8 @@ The DB access has been removed. This project implements an online framework for 
 
 ## Prerequisites
 
+Only required if you intend to compile the source code and run a local server or deploy on gh-pages. For instructions on updating the CW, see below. 
+
 1. [Mongo DB](https://docs.mongodb.com/manual/administration/install-on-linux/) - for local development, for legacy reasons
 2. [Node.js](https://nodejs.org/en/download/package-manager/)
 3. [npm](https://www.npmjs.com/get-npm)
@@ -91,7 +93,7 @@ After successfully pushing your code (cf. above), go (through the github web cli
 Choose a publishing source, and click `Save.` The site will be available as soon as the blue box turns green upon refreshing. 
 
 ## Adding / Changing Coursework 
-To add/remove/alter the current coursework configuration, follow the following steps: 
+To add/remove/alter the current coursework configuration, simply follow these two steps: 
 - If you changed any files, upload your changed `.uclcg` and `.png` files to `/demos`. 
 - Edit the `pathFile.txt` to contain the new/modified entry you wish to add to the database.
   - The `pathFile.txt` contains info about the current coursework in CSV format. The formatting is explained in the header. 
