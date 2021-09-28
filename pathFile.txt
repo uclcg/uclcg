@@ -1,5 +1,5 @@
 # header: 
-# this file will be automatically read and bundled into a json file. to add a cw or demo, insert/append to the list. Formatting: 
+# this file will be automatically read and bundled into a json file. to add a cw or demo, insert/append to the list. Formatting: (cmtTest)
 # .uclcg-url, tabGroupName, thumb-url, NiceName, ShortDescription, author, isHidden (js bool) 
 
 https://uclcg.github.io/uclcg/demos/demo_camera.uclcg, Demos, https://uclcg.github.io/uclcg/demos/thumb_camera.png, Demo - Simple Camera, A simple camera model., None, false
