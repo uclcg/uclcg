@@ -44,3 +44,5 @@ db = {'jsFiles': jsFiles,
 
 with open(os.path.join(basepath, 'db.json'), 'w') as file:
     json.dump(db, file)
+
+print("Created db.json object in path {}. All done. Exiting.".format(os.path.join(basepath, 'db.json')))

@@ -1,0 +1,19 @@
+name: Actions Test
+on:
+  push:
+    paths:
+      - 'pathFile.txt'
+jobs: 
+  Make-Database:
+    runs-on: ubuntu-latest
+    steps: 
+      - uses: actions/checkout@v2
+      - run: git config --global user.email "ucabmfi@ucl.ac.uk"
+      - run: git config --global user.name "UCLCG"
+      - run: echo "The job was automatically triggered bc pathfile changed."
+      - run: echo $"$PWD"/"make_json.py"
+      - run: python $"$PWD"/"make_json.py"
+      - run: git add demos/db.json
+      - run: git commit -m "changed db.json from gh action"
+      - run: git push 
+      - run: echo "Changed demos/db.json to contain the updated json database. All done. Exiting."
