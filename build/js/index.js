@@ -545,73 +545,79 @@ $(document).ready(function () {
         xhr.send();
     };
 
-    getJSON('https://uclcg.github.io/uclcg/demos/db.json', function(err, data) {
-        if (err !== null) {
-            alert('Something went wrong: ' + err);
-        }
+    // check if localhost --> no fileaccess 
+    if (location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.hostname === "") {
+        alert("Detected local server. Not serving up CW files and demos. \nYou can still load them manually, and use the renderer as expected");
+    } else {
+        getJSON('https://uclcg.github.io/uclcg/demos/db.json', function(err, data) {
+            if (err !== null) {
+                alert('Something went wrong: ' + err);
+            }
 
-        setups = [];
-        for(var i = 0; i < data.categories.length; i++) {
+            setups = [];
+            for(var i = 0; i < data.categories.length; i++) {
 
-            var isHidden = (data.hidden[i] === 'true');
-                var s = new Setup(data.jsFiles[i], data.categories[i], data.pictures[i], data.niceNames[i], data.shortDescriptions[i], data.authors[i], isHidden);
-                s._id = i;
-                setups.push(s);
-        }
+                var isHidden = (data.hidden[i] === 'true');
+                    var s = new Setup(data.jsFiles[i], data.categories[i], data.pictures[i],
+                                      data.niceNames[i], data.shortDescriptions[i], data.authors[i], isHidden);
+                    s._id = i;
+                    setups.push(s);
+            }
 
-        // all setups read and created, the rest is display stuff, copied from above!
+            // all setups read and created, the rest is display stuff, copied from above!
 
-        tabbedSetups = [];
-        for (var s = 0; s < setups.length; ++s) {
+            tabbedSetups = [];
+            for (var s = 0; s < setups.length; ++s) {
 
-            if (!setups[s].hidden) {
-                // add empty list if category doesnt exist yet
-                if (!tabbedSetups[setups[s].category]) {
-                    tabbedSetups[setups[s].category] = [];
+                if (!setups[s].hidden) {
+                    // add empty list if category doesnt exist yet
+                    if (!tabbedSetups[setups[s].category]) {
+                        tabbedSetups[setups[s].category] = [];
+                    }
+                    tabbedSetups[setups[s].category].push(setups[s]);
                 }
-                tabbedSetups[setups[s].category].push(setups[s]);
             }
-        }
 
-        //remember for delete button callbacks
-        buttonMap = [];
+            //remember for delete button callbacks
+            buttonMap = [];
 
-        var tabIdx = 0;
-        Object.keys(tabbedSetups).forEach(function (key) {
-            var lSetups = tabbedSetups[key];
+            var tabIdx = 0;
+            Object.keys(tabbedSetups).forEach(function (key) {
+                var lSetups = tabbedSetups[key];
 
-            //Initial UL
-            $("div#setupTabs ul").append(
-                "<li><a href='#setupTabs-" + tabIdx + "'>" + key + "</a></li>"
-            );
-            //Tab Detail
-            $("div#setupTabs").append(
-                `<div id="setupTabs-` + tabIdx + `"></div>`
-            );
-            //add content
-            var liDiv = $(`#setupTabs-` + tabIdx);
-            liDiv.append("<div id=\"setupRow-" + key + "\"class=\"row display-flex\"></div>");
-            for (var i = 0; i < lSetups.length; ++i) {
-                var parentRow = $("#setupRow-" + key);
-                var pic = lSetups[i].picture
-                var picIdx = lSetups[i].picture.lastIndexOf("/");
-                parentRow.append(`<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
-                                        <div class=" thumbnail">
-                                            <a id="` + key + `_load_` + i + `" href="#" class="loadButton">
-                                            <img src="` + pic.substring(0, picIdx + 1) + pic.substring(picIdx + 1) + `" alt="...">
-                                            </a>
-                                            <div class="caption">
-                                                <h3>` + lSetups[i].niceName + `</h3>
-                                                <p>` + lSetups[i].shortDescription + `</p>
-                                            </div>
-                                       </div>
-                                      </div>`);
-                buttonMap[key + "_load_" + i] = {id: lSetups[i]._id, jsFile: lSetups[i].jsFile};
-                $('.loadButton').on('click', loadSetupButton);
-            }
-            tabIdx += 1;
+                //Initial UL
+                $("div#setupTabs ul").append(
+                    "<li><a href='#setupTabs-" + tabIdx + "'>" + key + "</a></li>"
+                );
+                //Tab Detail
+                $("div#setupTabs").append(
+                    `<div id="setupTabs-` + tabIdx + `"></div>`
+                );
+                //add content
+                var liDiv = $(`#setupTabs-` + tabIdx);
+                liDiv.append("<div id=\"setupRow-" + key + "\"class=\"row display-flex\"></div>");
+                for (var i = 0; i < lSetups.length; ++i) {
+                    var parentRow = $("#setupRow-" + key);
+                    var pic = lSetups[i].picture
+                    var picIdx = lSetups[i].picture.lastIndexOf("/");
+                    parentRow.append(`<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                            <div class=" thumbnail">
+                                                <a id="` + key + `_load_` + i + `" href="#" class="loadButton">
+                                                <img src="` + pic.substring(0, picIdx + 1) + pic.substring(picIdx + 1) + `" alt="...">
+                                                </a>
+                                                <div class="caption">
+                                                    <h3>` + lSetups[i].niceName + `</h3>
+                                                    <p>` + lSetups[i].shortDescription + `</p>
+                                                </div>
+                                           </div>
+                                          </div>`);
+                    buttonMap[key + "_load_" + i] = {id: lSetups[i]._id, jsFile: lSetups[i].jsFile};
+                    $('.loadButton').on('click', loadSetupButton);
+                }
+                tabIdx += 1;
+            });
+            $("#setupTabs").tabs();
+
         });
-        $("#setupTabs").tabs();
-
-    });
+    }
 });
