@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps: 
       - uses: actions/checkout@v2
-      - run: git config --global user.email "ucabmfi@ucl.ac.uk"
+      - run: git config --global user.email "uclcg@web.de"
       - run: git config --global user.name "UCLCG"
       - run: git pull
       - run: echo "Database-Rebuild was automatically triggered because pathFile.txt was changed."
