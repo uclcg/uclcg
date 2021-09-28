@@ -87,13 +87,16 @@ If you push to a new repository that is not yet configured to serve a github web
 After successfully pushing your code (cf. above), go (through the github web client) to `Repository`&rarr;`Settings`, and select `Pages`on the left-side menu. 
 Choose a publishing source, and click `Save.` The site will be available as soon as the blue box turns green upon refreshing. 
 
-## Adding Coursework 
-To add/remove/alter the current coursework configuration, edit the file `pathFile.txt`, which is read automatically by `build/index.js`.
-The file contains the info about the current coursework in CSV format. The formatting is as follows: 
-`.uclcg-url, tabgroup, thumbnail-url, name, shortdescription, author, isHidden` <br> 
-where `tabgroup` is the name of the tab-supergroup (eg., Demos, Coursework), `name` is the filename that is to be displayed
-(eg., Coursework 1) and `isHidden` is a `js bool` (`true/false`) indicating whether the file should be loaded. 
-Currently, both `.urls` must be hosted by `github.io` to avoid `CORS errors` when fetching their content via URL requests. 
+## Adding / Changing Coursework 
+To add/remove/alter the current coursework configuration, follow the following steps: 
+- If you changed any files, upload your changed `.uclcg` and `.png` files to `/demos`. 
+- Edit the `pathFile.txt` to contain the new/modified entry you wish to add to the database.
+  - The file `pathFile.txt` contains info about the current coursework in CSV format. The formatting is explained in the header. 
+  Note that both `.urls` must refer to this repository to avoid `CORS errors` when fetching their content via `jQuery` URL requests. 
+   
+Github will then automatically run an action (cf. `.github/workflows`) that will detect the change in `pathFile.txt` and 
+call a python script that updates `demos/db.json`, which is then automatically read by `build/index.js` everytime the 
+site is accessed. Note: this may take a few minutes. 
 
 ## TODOs: 
 - Add Github Actions, such that: the repository is monitored, and stuff happens on push/pull actions. Ideally: whenever
