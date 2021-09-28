@@ -19,6 +19,9 @@
   <link rel="stylesheet" href="/uclcg/public/codemirror/addon/fold/foldgutter.css">
   <!-- UCL-->
   <link href="/uclcg/public/css/index.css" rel="stylesheet">
+
+  <link rel="shortcut icon" type="image/ico" href="/uclcg/favicon.ico">
+
 </head>
 <!-- Navigation-->
 <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
@@ -42,9 +45,9 @@
     <div class="row">
       <div class="col-md-12">
         <div id="setupIntro">
-          <p>Please<strong>don&apos;t forget to save your work to disk</strong> every now and then!<strong>
+          <p>Please<strong> don&apos;t forget to save your work to disk</strong> every now and then!<strong>
               To
-              update the render view</strong>: click the<strong>refresh button</strong> or hit<strong>ctrl-s/cmd-s</strong>.
+              update the render view</strong>, click the<strong> refresh button</strong> or hit<strong> ctrl-s/cmd-s</strong>.
             If that has no effect, you have probably made an error somewhere! Happy coding!
           </p>
           <div class="col-md-12" id="setupTabs">
@@ -118,7 +121,10 @@
 <script src="/uclcg/public/codemirror/addon/fold/comment-fold.js"></script>
 <script src="/uclcg/public/js/framework.js"></script>
 <script src="/uclcg/public/js/plugins/J3DI.js"></script>
-<script src="/uclcg/socket.io/socket.io.js"></script>
+
+<script src="/socket.io/socket.io.js"></script>
+
+
 <script src="/uclcg/public/js/index.js"></script>
 <!-- Google Line Charts-->
 <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
@@ -151,9 +157,9 @@
       <div class="modal-body">
         <div class="alert alert-success">
           <ul>
-            <li><b>Ctrl-F / Cmd-F :</b>Search</li>
-            <li><b>Alt-G :</b>Jump to a specific line</li>
-            <li><b>Ctrl-Q :</b>Collapses current segment</li>
+            <li><b>Ctrl-F / Cmd-F:</b> Search</li>
+            <li><b>Alt-G:</b> Jump to a specific line</li>
+            <li><b>Ctrl-Q:</b> Collapse current segment</li>
           </ul>
         </div>
         <p>Happy Coding!</p>

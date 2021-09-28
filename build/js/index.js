@@ -3,9 +3,11 @@ $(document).ready(function () {
     var loadedScript = false;
     var loadSetupButton = function (e) {
 
-        $.getScript(buttonMap[e.currentTarget.id].jsFile.substring(buttonMap[e.currentTarget.id].jsFile)).done(function (data, textStatus) {
+        // when loading from URL, jquery returns undefined data due to ajax crossdomain error. must use own repo
+        // cf. https://stackoverflow.com/questions/8035629/jquery-getscript-returns-undefined/8036430
+        var scriptURL = buttonMap[e.currentTarget.id].jsFile.substring(buttonMap[e.currentTarget.id].jsFile);
+        $.getScript(scriptURL).done(function (data, textStatus) {
             if ($("#setupTabs").data("ui-tabs")) {
-
                 clear(initFromJS, data, null, null);
             }
         }).fail(function (jqxhr, settings, exception) {
@@ -65,10 +67,9 @@ $(document).ready(function () {
         UI = {};
         env = {};
         IO = {};
-
         $("#implementationTabs").tabs({
             create: function (ui, event) {
-                callback(jsFileContents, initialResWidth, initialResHeight);
+                callback(jsFileContents, initialResWidth, initialResHeight);    // initFromJS
             },
             active: 0,
             collapsible: true,
@@ -84,6 +85,7 @@ $(document).ready(function () {
     function initFromJS(jsFileContents, initialResWidth, initialResHeight) {
 
         jsFileContents = jsFileContents.replace(`initGL(document.getElementById("glViewport"));`, "");
+
         //save file contents for later
         IO.inputFile = jsFileContents;
         //Try appending this file to the DOM
@@ -127,7 +129,6 @@ $(document).ready(function () {
         //set this to false at the start
         UI.showHidden = false;
         UI.codemirrorInstances = [];
-
         //Setup the UI as appropriate
         //page title
         $("#mainTitle").text("UCL Computer Graphics - " + UI.titleLong);
@@ -227,7 +228,6 @@ $(document).ready(function () {
 
     //How to load a new experiment
     function loadjsfile(fileName) {
-        console.log(fileName)
         var reader = new FileReader();
         reader.onload = function (e) {
             var jsFileContents = this.result;
@@ -506,7 +506,118 @@ $(document).ready(function () {
         $("#setupTabs").tabs();
     });*/
 
-//    var file = new File([""], "/home/michi/uclcg/cw1.uclcg");
-//    loadjsfile(file);
+    // from url doesnt work bc of CORS error --> must be github.io url !!
+    // from diff. repo URL works with fetch api, but not with jquery?
+    // init with single, pre-pulled file (no tabGroups):
+    /*
+    var scriptPath = 'https://uclcg.github.io/uclcg/demos/cw1_student.uclcg'
+    fetch(scriptPath).then(res => res.blob()).then(blob => {
+        var file = new File([blob], blob);
+        loadjsfile(file);
+    });*/
 
+    // replicate old database item
+    class Setup {
+        constructor(jsFile, category, picture, niceName, shortDescription, author, hidden) {
+            this.jsFile = jsFile;
+            this.category = category;
+            this.picture = picture;
+            this.niceName = niceName;
+            this.shortDescription = shortDescription;
+            this.author = author;
+            this.hidden = hidden;
+            this._id = 0;
+        }
+    }
+
+    var getJSON = function(url, callback) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.responseType = 'json';
+        xhr.onload = function() {
+            var status = xhr.status;
+            if (status === 200) {
+                callback(null, xhr.response);
+            } else {
+                callback(status, xhr.response);
+            }
+        };
+        xhr.send();
+    };
+
+    // check if localhost --> no fileaccess 
+    if (location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.hostname === "") {
+        alert("Detected local server. Not serving up CW files and demos. \nYou can still load them manually, and use the renderer as expected");
+    } else {
+        getJSON('https://uclcg.github.io/uclcg/demos/db.json', function(err, data) {
+            if (err !== null) {
+                alert('Something went wrong: ' + err);
+            }
+
+            setups = [];
+            for(var i = 0; i < data.categories.length; i++) {
+
+                var isHidden = (data.hidden[i] === 'true');
+                    var s = new Setup(data.jsFiles[i], data.categories[i], data.pictures[i],
+                                      data.niceNames[i], data.shortDescriptions[i], data.authors[i], isHidden);
+                    s._id = i;
+                    setups.push(s);
+            }
+
+            // all setups read and created, the rest is display stuff, copied from above!
+
+            tabbedSetups = [];
+            for (var s = 0; s < setups.length; ++s) {
+
+                if (!setups[s].hidden) {
+                    // add empty list if category doesnt exist yet
+                    if (!tabbedSetups[setups[s].category]) {
+                        tabbedSetups[setups[s].category] = [];
+                    }
+                    tabbedSetups[setups[s].category].push(setups[s]);
+                }
+            }
+
+            //remember for delete button callbacks
+            buttonMap = [];
+
+            var tabIdx = 0;
+            Object.keys(tabbedSetups).forEach(function (key) {
+                var lSetups = tabbedSetups[key];
+
+                //Initial UL
+                $("div#setupTabs ul").append(
+                    "<li><a href='#setupTabs-" + tabIdx + "'>" + key + "</a></li>"
+                );
+                //Tab Detail
+                $("div#setupTabs").append(
+                    `<div id="setupTabs-` + tabIdx + `"></div>`
+                );
+                //add content
+                var liDiv = $(`#setupTabs-` + tabIdx);
+                liDiv.append("<div id=\"setupRow-" + key + "\"class=\"row display-flex\"></div>");
+                for (var i = 0; i < lSetups.length; ++i) {
+                    var parentRow = $("#setupRow-" + key);
+                    var pic = lSetups[i].picture
+                    var picIdx = lSetups[i].picture.lastIndexOf("/");
+                    parentRow.append(`<div class="col-xs-12 col-sm-6 col-md-4 col-lg-3">
+                                            <div class=" thumbnail">
+                                                <a id="` + key + `_load_` + i + `" href="#" class="loadButton">
+                                                <img src="` + pic.substring(0, picIdx + 1) + pic.substring(picIdx + 1) + `" alt="...">
+                                                </a>
+                                                <div class="caption">
+                                                    <h3>` + lSetups[i].niceName + `</h3>
+                                                    <p>` + lSetups[i].shortDescription + `</p>
+                                                </div>
+                                           </div>
+                                          </div>`);
+                    buttonMap[key + "_load_" + i] = {id: lSetups[i]._id, jsFile: lSetups[i].jsFile};
+                    $('.loadButton').on('click', loadSetupButton);
+                }
+                tabIdx += 1;
+            });
+            $("#setupTabs").tabs();
+
+        });
+    }
 });

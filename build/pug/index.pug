@@ -19,6 +19,7 @@ head
     link(rel='stylesheet', href='/public/codemirror/addon/fold/foldgutter.css')
     // UCL
     link(href='/public/css/index.css', rel='stylesheet')
+    link(rel='shortcut icon', type='image/ico', href='/uclcg/favicon.ico')
 // Navigation
 nav.navbar.navbar-inverse.navbar-fixed-top(role='navigation')
     // Brand and toggle get grouped for better mobile display
@@ -58,15 +59,15 @@ nav.navbar.navbar-inverse.navbar-fixed-top(role='navigation')
                 #setupIntro
                     p
                         | Please
-                        strong don&apos;t forget to save your work to disk
+                        strong  don&apos;t forget to save your work to disk
                         |  every now and then!
                         strong
                             | To
                             | update the render view
-                        | : click the
-                        strong refresh button
+                        | , click the
+                        strong  refresh button
                         |  or hit
-                        strong ctrl-s/cmd-s
+                        strong  ctrl-s/cmd-s
                         | .
                         | If that has no effect, you have probably made an error somewhere! Happy coding!
                     #setupTabs.col-md-12
@@ -126,7 +127,7 @@ nav.navbar.navbar-inverse.navbar-fixed-top(role='navigation')
 #floatingPreview
     canvas#glViewportSmallClone(width='350', height='175')
 script(src='/public/js/plugins/jquery.js')
-script(src='http://code.jquery.com/ui/1.12.1/jquery-ui.min.js', integrity='sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=', crossorigin='anonymous')
+script(src='https://code.jquery.com/ui/1.12.1/jquery-ui.min.js')
 script(src='/public/js/plugins/bootstrap.min.js')
 script(src='/public/js/plugins/codemirror.js')
 script(src='/public/mode/javascript/javascript.js')
@@ -175,14 +176,14 @@ script(type='text/javascript').
                 .alert.alert-success
                     ul
                         li
-                            b Ctrl-F / Cmd-F :
-                            | Search
+                            b Ctrl-F / Cmd-F:
+                            |  Search
                         li
-                            b Alt-G :
-                            | Jump to a specific line
+                            b Alt-G:
+                            |  Jump to a specific line
                         li
-                            b Ctrl-Q :
-                            | Collapses current segment
+                            b Ctrl-Q:
+                            |  Collapse current segment
                 p Happy Coding!
             .modal-footer
                 button.btn.btn-default(type='button', data-dismiss='modal') Close
