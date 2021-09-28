@@ -2,7 +2,7 @@
 # this file will be automatically read and bundled into a json file. to add a cw or demo, insert/append to the list. formatting: 
 # .uclcg-url, tabGroupName, thumb-url, NiceName, ShortDescription, author, isHidden (js bool) 
 
-https://uclcg.github.io/uclcg/demos/demo_camera.uclcg, Demos, https://uclcg.github.io/uclcg/demos/thumb_camera.png, Demo - Simple Camera, A simple camera model., None, true
+https://uclcg.github.io/uclcg/demos/demo_camera.uclcg, Demos, https://uclcg.github.io/uclcg/demos/thumb_camera.png, Demo - Simple Camera, A simple camera model., None, false
 https://uclcg.github.io/uclcg/demos/demo_splines.uclcg, Demos, https://uclcg.github.io/uclcg/demos/thumb_splines.png, Demo - Animated Splines, An animated demo for splines., None, false
 https://uclcg.github.io/uclcg/demos/demo_openGL.uclcg, Demos, https://uclcg.github.io/uclcg/demos/thumb_openGL.png, Demo - Animated OpenGL, An animated demo for OpenGL., None, false
 
