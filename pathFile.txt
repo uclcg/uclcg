@@ -8,4 +8,4 @@ https://uclcg.github.io/uclcg/demos/demo_openGL.uclcg, Demos, https://uclcg.gith
 
 https://uclcg.github.io/uclcg/demos/cw1_student.uclcg, Coursework, https://uclcg.github.io/uclcg/demos/thumb_cw1.png, Coursework 1 - 2021/22, Coursework 1 - Ray Tracing, None, false 
 https://uclcg.github.io/uclcg/demos/cw2_student.uclcg, Coursework, https://uclcg.github.io/uclcg/demos/thumb_cw2.png, Coursework 2 - 2021/22, Coursework 2 - Rasterization, None, false 
-https://uclcg.github.io/uclcg/demos/cw3_student.uclcg, Coursework, https://uclcg.github.io/uclcg/demos/thumb_cw3.png, Coursework 3 - 2021/22, Coursework 3 - Path Tracing, None, true
+https://uclcg.github.io/uclcg/demos/cw3_student.uclcg, Coursework, https://uclcg.github.io/uclcg/demos/thumb_cw3.png, Coursework 3 - 2021/22, Coursework 3 - Path Tracing, None, false
