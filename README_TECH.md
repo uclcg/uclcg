@@ -96,9 +96,4 @@ To add/remove/alter the current coursework configuration, follow the following s
    
 Github will then automatically run an action (cf. `.github/workflows`) that will detect the change in `pathFile.txt` and 
 call a python script that updates `demos/db.json`, which is then automatically read by `build/index.js` everytime the 
-site is accessed. Note: this may take a few minutes. 
-
-## TODOs: 
-- Add Github Actions, such that: the repository is monitored, and stuff happens on push/pull actions. Ideally: whenever
-  a new file is pushed to the CW repository, we would run make_json.py, which in turn creates a db.json
-  object in said repo, which is then read by the system and transformed into tabgroups and tabs. 
+site is accessed. Note: this may take a few minutes.
