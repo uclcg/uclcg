@@ -11,9 +11,25 @@ jobs:
       - run: git config --global user.email "ucabmfi@ucl.ac.uk"
       - run: git config --global user.name "UCLCG"
       - run: git pull
-      - run: echo "The job was automatically triggered bc pathfile changed."
+      - run: echo "Database-Rebuild was automatically triggered because pathFile.txt was changed."
       - run: python $"$PWD"/"make_json.py"
-      - run: git add demos/db.json
-      - run: git commit -m "changed db.json from gh action"
-      - run: git push 
-      - run: echo "Changed demos/db.json to contain the updated json database. All done. Exiting."
+      
+      - name: Verify Changed Files
+        uses: tj-actions/verify-changed-files@v7.2
+        id: verify-changed-files
+        with: 
+          files: demos/db.json
+    
+      - name: Run Only When DB Changed
+        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        run: | 
+          git add demos/db.json
+          git commit -m "changed db.json from gh action"
+          git push 
+          echo "Changed demos/db.json to contain the updated json database. All done. Exiting."
+          
+      - name: Run Only When DB has not Changed
+        if: steps.verify-changed-files.outputs.files_changed == 'false'
+        run: | 
+          echo "Pathfile has changed, but db.json remained the same. Nothing to do. Exiting."
+          
