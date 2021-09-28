@@ -44,14 +44,19 @@ cd uclcg && /usr/bin/forever start -c /usr/bin/node server.js
 # if npm install throws gyp-rebuild error: switch to node v11.10.0, with eg: nvm use 11.10.0
 # full forever path might be unnecessary: forever start server.js
 # when the source code has changed, it is necessary to recompile with grunt for the changes to be shown
-# if forever errors out with MongoError, check if MongoDB is running correctly.   
+# if forever errors out with MongoError, check if MongoDB is running correctly.  
+# if you made changes to the sourcecode after pulling, you need to recompile via grunt (see below).  
 ```
 
 This should fire up `server.js` at `localhost:8080`, if no other port is specified (cf.`server/config.js`) 
+- The `localhost` version currently is configured to only serve the upload-script-functionality, without displaying the tabgroups and images. This is due to jQuerys inability of fetching
+   cross-domain content, cf. [this](https://stackoverflow.com/questions/8035629/jquery-getscript-returns-undefined/8036430) question. 
+   One way to solve this (**locally**, pushing this will break the website) is to change the variable `scriptURL` in `index.js` to the local, relative path of the `.uclcg` files.
+    
 
 ## Deployment (github-pages)
 
-The code can be found in the `build` directory. All necessary steps to compile/copy/uglify/etc. the source code are done via 
+The code can be found in the `build` directory. All necessary steps to compile/copy/uglify/etc. the sources are done via 
 Grunt. For use with Github pages, the grunt-created files must be sanitized after creation (see below). 
 ### Grunt
 
@@ -76,10 +81,8 @@ Notes:
 - If you're simultaneously running a local version 
 on `localhost:80xx`, running `sanitize.py` is going to break it, as the path names will be changed. Simply run `grunt` once more after 
 pushing, to have the local server work again.
-- The `localhost` version currently cannot display the tabgroups and images. This is due to jQuerys inability of fetching
-   cross-domain content, cf. [this](https://stackoverflow.com/questions/8035629/jquery-getscript-returns-undefined/8036430) question. 
-   This can be solved by changing the variable `scriptPath` to the local, relative path of the `.uclcg` files, which in
-   turn will break the working github-pages version, when pushed. 
+
+ 
 
 
 ### Initial github-pages setup
@@ -91,9 +94,9 @@ Choose a publishing source, and click `Save.` The site will be available as soon
 To add/remove/alter the current coursework configuration, follow the following steps: 
 - If you changed any files, upload your changed `.uclcg` and `.png` files to `/demos`. 
 - Edit the `pathFile.txt` to contain the new/modified entry you wish to add to the database.
-  - The file `pathFile.txt` contains info about the current coursework in CSV format. The formatting is explained in the header. 
+  - The `pathFile.txt` contains info about the current coursework in CSV format. The formatting is explained in the header. 
   Note that both `.urls` must refer to this repository to avoid `CORS errors` when fetching their content via `jQuery` URL requests. 
    
 Github will then automatically run an action (cf. `.github/workflows`) that will detect the change in `pathFile.txt` and 
 call a python script that updates `demos/db.json`, which is then automatically read by `build/index.js` everytime the 
-site is accessed. Note: this may take a few minutes.
+site is accessed. Note: it may take a few minutes for your changes to become visible on the live webpage. 
