@@ -47,7 +47,6 @@ cd uclcg && /usr/bin/forever start -c /usr/bin/node server.js
 # full forever path might be unnecessary: forever start server.js
 # when the source code has changed, it is necessary to recompile with grunt for the changes to be shown
 # if forever errors out with MongoError, check if MongoDB is running correctly.  
-# if you made changes to the sourcecode after pulling, you need to recompile via grunt (see below).  
 ```
 
 This should fire up `server.js` at `localhost:8080`, if no other port is specified (cf.`server/config.js`) 
