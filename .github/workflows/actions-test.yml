@@ -1,0 +1,6 @@
+name: Actions Test
+on:
+  push:
+    paths:
+      - 'pathFile.txt'
+      - run: echo "The job was automatically triggered bc pathfile changed."
