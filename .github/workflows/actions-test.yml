@@ -3,4 +3,8 @@ on:
   push:
     paths:
       - 'pathFile.txt'
+jobs: 
+  Make-Database:
+    runs-on: ubuntu-latest
+    steps: 
       - run: echo "The job was automatically triggered bc pathfile changed."
