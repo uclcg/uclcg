@@ -8,6 +8,5 @@ jobs:
     runs-on: ubuntu-latest
     steps: 
       - run: echo "The job was automatically triggered bc pathfile changed."
-      - run: pwd 
-      - run: ls 
-      - run: ls ${{ github.workspace }} 
+      - run: python make_json.py
+      - run: echo "Changed demos/db.json to contain the updated json database."
