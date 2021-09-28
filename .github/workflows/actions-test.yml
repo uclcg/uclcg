@@ -11,4 +11,7 @@ jobs:
       - run: echo "The job was automatically triggered bc pathfile changed."
       - run: echo $"$PWD"/"make_json.py"
       - run: python $"$PWD"/"make_json.py"
-      - run: echo "Changed demos/db.json to contain the updated json database."
+      - run: git add demos/db.json
+      - run: git commit -m "changed db.json from gh action"
+      - run: git push 
+      - run: echo "Changed demos/db.json to contain the updated json database. All done. Exiting."
