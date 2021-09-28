@@ -8,6 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     steps: 
       - uses: actions/checkout@v2
+      - run: git config --global user.email "ucabmfi@ucl.ac.uk"
+      - run: git config --global user.name "UCLCG"
       - run: echo "The job was automatically triggered bc pathfile changed."
       - run: echo $"$PWD"/"make_json.py"
       - run: python $"$PWD"/"make_json.py"
