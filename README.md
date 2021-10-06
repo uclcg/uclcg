@@ -21,12 +21,6 @@ skeletons for the respective tasks that need to be solved. Uncomment the `#defin
 first few lines to activate the respective subtasks. Put your code between the respective `#ifdef` and hit `ctrl/cmd + s` to update the render view.
 Remember to frequently save your progress - to do so, the system provides the 'Save Setup' functionality in the dropdown menu in the upper right corner. 
 
-## Courseworks
-
-- CW 1: TBA 
-- CW 2: TBA 
-- CW 3: TBA 
-
 ## Important Submission Information 
 
 - **Check your defines:** When we correct your submissions and there is an error, we need to check each task separately to find out what's wrong. This is why we included the `#define` statements. Do not change or alter their structure and verify that your code compiles when they are commented out. The desired behaviour is: all defines commented but the first one: image for task 1 displayed. All defines commented but first and second: image for task 2 displayed, and so on. **Non-compliance might result in point deduction!**
