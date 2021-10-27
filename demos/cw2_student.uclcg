@@ -5,9 +5,9 @@ function setup()
 	UI.titleLong = 'Rasterization Demo';
 	UI.titleShort = 'rasterizationDemo';
 	UI.numFrames = 1000;
-	UI.maxFPS = 24;
-	UI.renderWidth = 800;
-	UI.renderHeight = 400;
+	UI.maxFPS = 25;
+	UI.renderWidth = 200;
+	UI.renderHeight = 100;
 
 	UI.tabs.push(
 		{
@@ -15,11 +15,12 @@ function setup()
 		type: `x-shader/x-fragment`,
 		title: `Rasterization`,
 		id: `RasterizationDemoFS`,
-		initialValue: `//#define PROJECTION
-//#define RASTERIZATION
-//#define CLIPPING
-//#define INTERPOLATION
-//#define ZBUFFERING
+		initialValue: `//#define SOLUTION_PROJECTION
+//#define SOLUTION_RASTERIZATION
+//#define SOLUTION_CLIPPING
+//#define SOLUTION_INTERPOLATION
+//#define SOLUTION_ZBUFFERING
+//#define SOLUTION_AALIAS
 
 precision highp float;
 uniform float time;
@@ -80,7 +81,7 @@ void makeEmptyPolygon(out Polygon polygon) {
 #define INSIDE 3
 
 int getCrossType(Vertex poli1, Vertex poli2, Vertex wind1, Vertex wind2) {
-#ifdef CLIPPING
+#ifdef SOLUTION_CLIPPING
     // TODO
 #else
     return INSIDE;
@@ -89,7 +90,7 @@ int getCrossType(Vertex poli1, Vertex poli2, Vertex wind1, Vertex wind2) {
 
 // This function assumes that the segments are not parallel or collinear.
 Vertex intersect2D(Vertex a, Vertex b, Vertex c, Vertex d) {
-#ifdef CLIPPING
+#ifdef SOLUTION_CLIPPING
     // TODO
 #else
     return a;
@@ -117,7 +118,7 @@ void sutherlandHodgmanClip(Polygon unclipped, Polygon clipWindow, out Polygon re
             
             // Handle the j-th vertex of the clipped polygon. This should make use of the function 
             // intersect() to be implemented above.
-#ifdef CLIPPING
+#ifdef SOLUTION_CLIPPING
             // TODO
 #else
             appendVertexToPolygon(clipped, getWrappedPolygonVertex(oldClipped, j));
@@ -129,7 +130,7 @@ void sutherlandHodgmanClip(Polygon unclipped, Polygon clipWindow, out Polygon re
     copyPolygon(result, clipped);
 }
 
-// Rasterization and culling part
+// SOLUTION_RASTERIZATION and culling part
 
 #define INNER_SIDE 0
 #define OUTER_SIDE 1
@@ -137,7 +138,7 @@ void sutherlandHodgmanClip(Polygon unclipped, Polygon clipWindow, out Polygon re
 // Assuming a clockwise (vertex-wise) polygon, returns whether the input point 
 // is on the inner or outer side of the edge (ab)
 int edge(vec2 point, Vertex a, Vertex b) {
-#ifdef RASTERIZATION
+#ifdef SOLUTION_RASTERIZATION
     // TODO
 #endif
     return OUTER_SIDE;
@@ -151,7 +152,7 @@ bool isPointInPolygon(vec2 point, Polygon polygon) {
     bool rasterise = true;
     for (int i = 0; i < MAX_VERTEX_COUNT; ++i) {
         if (i < polygon.vertexCount) {
-#ifdef RASTERIZATION
+#ifdef SOLUTION_RASTERIZATION
             // TODO
 #else
             rasterise = false;
@@ -191,25 +192,25 @@ Vertex interpolateVertex(vec2 point, Polygon polygon) {
     
 	for (int i = 0; i < MAX_VERTEX_COUNT; ++i) {
         if (i < polygon.vertexCount) {
-#if defined(INTERPOLATION) || defined(ZBUFFERING)
+#if defined(SOLUTION_INTERPOLATION) || defined(SOLUTION_ZBUFFERING)
             // TODO
 #endif
 
-#ifdef ZBUFFERING
+#ifdef SOLUTION_ZBUFFERING
             // TODO
 #endif
 
-#ifdef INTERPOLATION
+#ifdef SOLUTION_INTERPOLATION
             // TODO
 #endif
         }
     }
     Vertex result = polygon.vertices[0];
   
-#ifdef INTERPOLATION
+#ifdef SOLUTION_INTERPOLATION
     // TODO
 #endif
-#ifdef ZBUFFERING
+#ifdef SOLUTION_ZBUFFERING
     // TODO
 #endif
 
@@ -222,11 +223,15 @@ Vertex interpolateVertex(vec2 point, Polygon polygon) {
 mat4 computeProjectionMatrix() {
     mat4 projectionMatrix = mat4(1);
   
-  float aspect = float(viewport.x) / float(viewport.y);  
-  float imageDistance = 2.0;
+  	float aspect = float(viewport.x) / float(viewport.y);  
+  	float imageDistance = 2.0;
+		
+	float xMin = -0.5;
+	float yMin = -0.5;
+	float xMax = 0.5;
+	float yMax = 0.5;
 
-#ifdef PROJECTION
-    // TODO
+#ifdef SOLUTION_PROJECTION
 #endif
   
     return projectionMatrix;
@@ -236,7 +241,7 @@ mat4 computeProjectionMatrix() {
 mat4 computeViewMatrix(vec3 VRP, vec3 TP, vec3 VUV) {
     mat4 viewMatrix = mat4(1);
 
-#ifdef PROJECTION
+#ifdef SOLUTION_PROJECTION
     // TODO
 #endif
     return viewMatrix;
@@ -261,7 +266,7 @@ vec4 projectVertexPosition(vec4 position) {
   // Compute the projection matrix.
     mat4 projectionMatrix = computeProjectionMatrix();
   
-#ifdef PROJECTION
+#ifdef SOLUTION_PROJECTION
     // TODO
 #else
     return position;
@@ -296,7 +301,7 @@ void drawPolygon(
       
         Vertex interpolatedVertex = 
           interpolateVertex(point, projectedPolygon);
-#if defined(ZBUFFERING)
+#if defined(SOLUTION_ZBUFFERING)
         // TODO: Put your code to handle z buffering here
 #else
       color = interpolatedVertex.color;
@@ -344,7 +349,7 @@ void drawScene(vec2 pixelCoord, inout vec3 color) {
     triangles[1].vertices[1].color = vec3(0.2, 1.0, 0.1);
     triangles[1].vertices[2].color = vec3(1.0, 1.0, 1.0);
     triangles[1].vertices[0].color = vec3(0.1, 0.2, 1.0);
-    triangles[1].vertexCount = 3;
+    triangles[1].vertexCount = 3;	
 	
     float depth = 10000.0;
     // Project and draw all the triangles
@@ -354,7 +359,15 @@ void drawScene(vec2 pixelCoord, inout vec3 color) {
 }
 
 void main() {
-    drawScene(gl_FragCoord.xy, gl_FragColor.rgb);
+	
+	vec3 color = vec3(0);
+	
+#ifdef SOLUTION_AALIAS
+#else
+    drawScene(gl_FragCoord.xy, color);
+#endif
+	
+	gl_FragColor.rgb = color;	
     gl_FragColor.a = 1.0;
 }`,
 		description: ``,
@@ -674,4 +687,3 @@ function compute(canvas)
     env.run();
     env.drawScene();
 }
-
