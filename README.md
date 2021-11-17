@@ -29,3 +29,8 @@ Remember to frequently save your progress - to do so, the system provides the 'S
 - You will not have to use any other programming languages, so please do not write answers in other languages, paper, or pseudo-code. 
 - In the end, submit your final `.uclcg` file via Moodle. The filename should not contain your name. 
 - You should not have to change any other parts than the `#ifdef` statements. In your final hand-in version, please refrain from changing constants like background color, primitive position, etc., as this will make it harder to verify the correctness of your submission. 
+
+## Credits 
+The following persons have contributed to the UCLCG Renderer and the Comp0027 course:
+
+Stephan Garbin, Philipp Henzler, Michael Fischer, Yiftach Ginger, Felix Thiel,  Chinthala Pradyumna Reddy.   
