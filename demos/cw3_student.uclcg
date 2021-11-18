@@ -1,13 +1,21 @@
+// filename: cw3_student.uclcg
+// tabGroup: Coursework
+// thumbnail: cw3_thumb.png
+// displayname: Coursework 3 - 2021/2022
+// shortDescription: Coursework 3 - Path Tracing
+// author: None
+// isHidden: false
+
 function setup()
 {
 	UI = {};
 	UI.tabs = [];
 	UI.titleLong = 'Path Tracer';
 	UI.titleShort = 'PathTracer';
-	UI.numFrames = 100000;
+	UI.numFrames = 500;
 	UI.maxFPS = 1000;
-	UI.renderWidth = 512;
-	UI.renderHeight = 256;
+	UI.renderWidth = 2048;
+	UI.renderHeight = 1024;
 
 	UI.tabs.push(
 		{
@@ -19,16 +27,16 @@ function setup()
 //#define SOLUTION_BOUNCE
 //#define SOLUTION_THROUGHPUT
 //#define SOLUTION_HALTON
-//#define SOLUTION_NEXT_EVENT_ESTIMATION
 //#define SOLUTION_AA
+//#define SOLUTION_IS 
 
 precision highp float;
 
 #define M_PI 3.1415
 
 struct Material {
-#ifdef SOLUTION_LIGHT    
-#endif  
+#ifdef SOLUTION_LIGHT
+#endif
   vec3 diffuse;
   vec3 specular;
   float glossiness;
@@ -73,10 +81,16 @@ struct HitInfo {
   Material material;
 };
 
+// Contains info to sample a direction and this directions probability
+struct DirectionSample {
+	vec3 direction;
+	float probability;
+};
+
 HitInfo getEmptyHit() {
   Material emptyMaterial;
-#ifdef SOLUTION_LIGHT  
-#endif  
+#ifdef SOLUTION_LIGHT
+#endif
   emptyMaterial.diffuse = vec3(0.0);
   emptyMaterial.specular = vec3(0.0);
   emptyMaterial.glossiness = 0.0;
@@ -100,29 +114,29 @@ bool isTInInterval(const float t, const float tMin, const float tMax) {
 
 // Get the smallest t in an interval
 bool getSmallestTInInterval(float t0, float t1, const float tMin, const float tMax, inout float smallestTInInterval) {
-  
+
   sortT(t0, t1);
-  
+
   // As t0 is smaller, test this first
   if(isTInInterval(t0, tMin, tMax)) {
   	smallestTInInterval = t0;
     return true;
   }
-  
+
   // If t0 was not in the interval, still t1 could be
   if(isTInInterval(t1, tMin, tMax)) {
   	smallestTInInterval = t1;
     return true;
-  }  
-  
+  }
+
   // None was
   return false;
 }
 
 HitInfo intersectSphere(const Ray ray, const Sphere sphere, const float tMin, const float tMax) {
-              
+
     vec3 to_sphere = ray.origin - sphere.position;
-  
+
     float a = dot(ray.direction, ray.direction);
     float b = 2.0 * dot(ray.direction, to_sphere);
     float c = dot(to_sphere, to_sphere) - sphere.radius * sphere.radius;
@@ -131,18 +145,18 @@ HitInfo intersectSphere(const Ray ray, const Sphere sphere, const float tMin, co
     {
 		float t0 = (-b - sqrt(D)) / (2.0 * a);
 		float t1 = (-b + sqrt(D)) / (2.0 * a);
-      
+
       	float smallestTInInterval;
       	if(!getSmallestTInInterval(t0, t1, tMin, tMax, smallestTInInterval)) {
           return getEmptyHit();
         }
-      
-      	vec3 hitPosition = ray.origin + smallestTInInterval * ray.direction;      
 
-      	vec3 normal = 
-          	length(ray.origin - sphere.position) < sphere.radius + 0.001? 
-          	-normalize(hitPosition - sphere.position) : 
-      		normalize(hitPosition - sphere.position);      
+      	vec3 hitPosition = ray.origin + smallestTInInterval * ray.direction;
+
+      	vec3 normal =
+          	length(ray.origin - sphere.position) < sphere.radius + 0.001?
+          	-normalize(hitPosition - sphere.position) :
+      		normalize(hitPosition - sphere.position);
 
         return HitInfo(
           	true,
@@ -162,7 +176,7 @@ HitInfo intersectPlane(Ray ray, Plane plane) {
 	t,
 	hitPosition,
 	normalize(plane.normal),
-	plane.material); 
+	plane.material);
     return getEmptyHit();
 }
 
@@ -180,7 +194,7 @@ HitInfo intersectScene(Scene scene, Ray ray, const float tMin, const float tMax)
         Sphere sphere = scene.spheres[i];
         HitInfo hit_info = intersectSphere(ray, sphere, tMin, tMax);
 
-        if(	hit_info.hit && 
+        if(	hit_info.hit &&
            	hit_info.t < best_hit_info.t &&
            	hit_info.t > tMin)
         {
@@ -192,14 +206,14 @@ HitInfo intersectScene(Scene scene, Ray ray, const float tMin, const float tMax)
         Plane plane = scene.planes[i];
         HitInfo hit_info = intersectPlane(ray, plane);
 
-        if(	hit_info.hit && 
+        if(	hit_info.hit &&
            	hit_info.t < best_hit_info.t &&
            	hit_info.t > tMin)
         {
             best_hit_info = hit_info;
         }
     }
-  
+
   return best_hit_info;
 }
 
@@ -212,7 +226,7 @@ float randomInetegerToRandomFloat(int i) {
 int pixelIntegerSeed(const int dimensionIndex) {
   vec3 p = vec3(gl_FragCoord.xy, dimensionIndex);
   vec3 r = vec3(23.14069263277926, 2.665144142690225,7.358926345 );
-  return int(32768.0 * fract(cos(dot(p,r)) * 123456.0));  
+  return int(32768.0 * fract(cos(dot(p,r)) * 123456.0));
 }
 
 // Returns a random float for every pixel that remains the same in all iterations
@@ -228,14 +242,14 @@ void initRandomSequence() {
   randomSeed = globalSeed + pixelIntegerSeed(0);
 }
 
-// Computesinteger  x modulo y not available in most WEBGL SL implementations
+// Computes integer  x modulo y not available in most WEBGL SL implementations
 int mod(const int x, const int y) {
   return int(float(x) - floor(float(x) / float(y)) * float(y));
 }
 
 // Returns the next integer in a pseudo-random sequence
 int rand() {
-  	randomSeed = randomSeed * 1103515245 + 12345;   
+  	randomSeed = randomSeed * 1103515245 + 12345;
 	return mod(randomSeed / 65536, 32768);
 }
 
@@ -244,7 +258,7 @@ float uniformRandom() {
 	return randomInetegerToRandomFloat(rand());
 }
 
-// Returns the ith prime number for the first 20 
+// Returns the ith prime number for the first 20
 const int maxDimensionCount = 10;
 int prime(const int index) {
   if(index == 0) return 2;
@@ -270,11 +284,11 @@ int prime(const int index) {
 #endif
 
 float halton(const int sampleIndex, const int dimensionIndex) {
-#ifdef SOLUTION_HALTON  
+#ifdef SOLUTION_HALTON
 #else
-  // Put your imeplemntation of halton here
+  // Put your implementation of halton in the #ifdef above 
   return 0.0;
-  #endif
+#endif
 }
 
 // This is the index of the sample controlled by the framework.
@@ -283,11 +297,11 @@ uniform int baseSampleIndex;
 
 // Returns a well-distributed number in (0,1) for the dimension dimensionIndex
 float sample(const int dimensionIndex) {
-#ifdef SOLUTION_HALTON  
+#ifdef SOLUTION_HALTON
 #else
-  // Replace the line below to use the Halton sequence for variance reduction
+  // Use the Halton sequence for variance reduction in the #ifdef above
   return uniformRandom();
-#endif  
+#endif
 }
 
 // This is a helper function to sample two-dimensionaly in dimension dimensionIndex
@@ -314,179 +328,138 @@ vec3 sample3(const int dimensionIndex) {
 // This is 2 for two dimensions and 2 as we use it for two purposese: NEE and path connection
 #define PATH_SAMPLE_DIMENSION_MULTIPLIER (2 * 2)
 
-vec3 randomDirection(const int dimensionIndex) {
-#ifdef SOLUTION_BOUNCE
-#else
-  // Put yout code to compute a random direction in 3D here
-  return vec3(0);
-#endif
-}
-
 vec3 getEmission(const Material material, const vec3 normal) {
-#ifdef SOLUTION_LIGHT  
+#ifdef SOLUTION_LIGHT
 #else
   	// This is wrong. It just returns the diffuse color so that you see something to be sure it is working.
   	return material.diffuse;
 #endif
 }
 
-vec3 getReflectance(
-  const Material material,
-  const vec3 normal,
-  const vec3 inDirection,
-  const vec3 outDirection)
-{
-#ifdef SOLUTION_THROUGHPUT    
+vec3 getReflectance(const Material material, const vec3 normal, const vec3 inDirection, const vec3 outDirection) {
+#ifdef SOLUTION_THROUGHPUT
 #else
   return vec3(1.0);
-#endif 
+#endif
 }
 
-vec3 getGeometricTerm(
-  const Material material,
-  const vec3 normal,
-  const vec3 inDirection,
-  const vec3 outDirection)
-{
-#ifdef SOLUTION_THROUGHPUT  
+vec3 getGeometricTerm(const Material material, const vec3 normal, const vec3 inDirection, const vec3 outDirection) {
+#ifdef SOLUTION_THROUGHPUT
 #else
   return vec3(1.0);
-#endif 
+#endif
 }
 
-mat4 rotationMatrixFromAngleAxis(float angle, vec3 axis)
-{
-    axis = normalize(axis);
-    float s = sin(angle);
-    float c = cos(angle);
-    float oc = 1.0 - c;
-    
-    return mat4(oc * axis.x * axis.x + c,           
-                oc * axis.x * axis.y - axis.z * s,  
-                oc * axis.z * axis.x + axis.y * s,  0.0,
-                oc * axis.x * axis.y + axis.z * s,  
-                oc * axis.y * axis.y + c,           
-                oc * axis.y * axis.z - axis.x * s,  0.0,
-                oc * axis.z * axis.x - axis.y * s,  
-                oc * axis.y * axis.z + axis.x * s,  
-                oc * axis.z * axis.z + c,           0.0,
-                0.0,                                
-                0.0,                                
-                0.0,                                
-                1.0);
+vec3 sphericalToEuclidean(float theta, float phi) {
+	float x = sin(theta) * cos(phi);
+	float y = sin(theta) * sin(phi);
+	float z = cos(theta);
+	return vec3(x, y, z);	
 }
 
-vec3 getEmitterPosition(const vec3 position, const Sphere sphere, const int dimensionIndex) {   
-  // This is a simplified version: Just report the sphere center. Will not do well with visibility.
-  //return sphere.position;
-  
-  // This is the wrong simplified version: Take a random surface point.
-  //return sphere.position + randomDirection(dimensionIndex) * sphere.radius;
+vec3 getRandomDirection(const int dimensionIndex) {
+#ifdef SOLUTION_BOUNCE
+#else
+	// Put your code to compute a random direction in 3D in the #ifdef above
+	return vec3(0);
+#endif
+}
 
-  // Well we stick our fingers in
-  // The ground, heave and 
-  // Turn the world around
+mat3 transpose(mat3 m) {
+	return mat3(
+		m[0][0], m[1][0], m[2][0],
+		m[0][1], m[1][1], m[2][1],
+		m[0][2], m[1][2], m[2][2]
+	);
+}
 
-  // This has three main steps: 
-  //   1) Make a direction
-  //   2) Orient it so it points to the sphere
-  //   3) Find a point on the sphere along this direction
-  
-  // Step 1) Make a random direction in a cone orientedd along th up-pointing z direction
-  // .. the opening angle of a sphere in a certain distance
-  float apexAngle = asin(sphere.radius / length(position - sphere.position));
- 
-  // The rotation around the z axis
-  float phi = sample(dimensionIndex + 1) * 2.0 * M_PI;  
-  
-  // z is the cosine of the angle.
-  // We need a random cosine of the angle (which is notthe same as the cosine of a random angle!)
-  float z = mix(1.0, cos(apexAngle), sample(dimensionIndex + 0));
-  vec3 alignedDirection = vec3(sqrt(1.0-z*z) * cos(phi), sqrt(1.0-z*z) * sin(phi), z);
-  
-  // Step 2) Rotate the z axis-aligned dirction to point into the direction of the sphere
-  vec3 direction = normalize(sphere.position - position);    
-  float rotationAngle = acos(dot(direction, vec3(0,0,1)));
-  vec3 rotationAxis = cross(direction, vec3(0,0,1));  
-  mat4 rotationMatrix = rotationMatrixFromAngleAxis(rotationAngle, rotationAxis);
-  vec3 worldDirection = (rotationMatrix * vec4(alignedDirection, 0)).xyz;
-  
-  // Step 3) Send a ray. it feels this should be easier, but Tobias does not see it.
-  Ray emitterRay;
-  emitterRay.origin = position;
-  emitterRay.direction = worldDirection;
-  return intersectSphere(emitterRay, sphere, 0.01, 100000.0).position;
+// This function creates a matrix to transform from global space into a local space oriented around the normal.
+// Might be useful for importance sampling BRDF / the geometric term.
+mat3 makeLocalFrame(const vec3 normal) {
+#ifdef SOLUTION_IS
+#else
+	return mat3(1.0);
+#endif
+}
+
+DirectionSample sampleDirection(const vec3 normal, const int dimensionIndex) {
+	DirectionSample result;
+	
+#ifdef SOLUTION_IS
+#else
+	// Put yout code to compute Importance Sampling in the #ifdef above 
+	result.direction = getRandomDirection(dimensionIndex);	
+	result.probability = 1.0;
+#endif
+	return result;
 }
 
 vec3 samplePath(const Scene scene, const Ray initialRay) {
-  
+
   // Initial result is black
   vec3 result = vec3(0);
-  
+
   Ray incomingRay = initialRay;
   vec3 throughput = vec3(1.0);
   for(int i = 0; i < maxPathLength; i++) {
-    HitInfo hitInfo = intersectScene(scene, incomingRay, 0.001, 10000.0); 
-    
+    HitInfo hitInfo = intersectScene(scene, incomingRay, 0.001, 10000.0);
+
     if(!hitInfo.hit) return result;
-         
-#ifdef SOLUTION_NEXT_EVENT_ESTIMATION    
-    // Loop over all spheres emitting light
-#else
-    // Put the next event-estimation code here
-    // This might need to change with NEE
-    result += throughput * getEmission(hitInfo.material, hitInfo. normal);  
-#endif
-        
+  	
+	result += throughput * getEmission(hitInfo.material, hitInfo.normal);
+
     Ray outgoingRay;
+	DirectionSample directionSample;
 #ifdef SOLUTION_BOUNCE
 #else
-   // Put your code to compute the next ray here
-#endif    
+	 // Put your code to compute the next ray in the #ifdef above
+#endif
 
 #ifdef SOLUTION_THROUGHPUT
 #else
-    // Replace the line below for proper throughput computation
-    throughput *= 0.1;    
+    // Compute the proper throughput in the #ifdef above 
+    throughput *= 0.1;
 #endif
-    
-    // With importance sampling, this value woudl change
-    float probability = 1.0;
-    throughput /= probability;
-    
+
+#ifdef SOLUTION_IS
+#else
+	// Without Importance Sampling, there is nothing to do here. 
+	// Put your Importance Sampling code in the #ifdef above
+#endif
+
 #ifdef SOLUTION_BOUNCE
 #else
-    // Put some handling of the next and the current ray here
-#endif    
-  }  
+	// Put some handling of the next and the current ray in the #ifdef above
+#endif
+  }
   return result;
 }
 
 uniform ivec2 resolution;
 Ray getFragCoordRay(const vec2 fragCoord) {
-  
+
   	float sensorDistance = 1.0;
   	vec3 origin = vec3(0, 0, sensorDistance);
   	vec2 sensorMin = vec2(-1, -0.5);
   	vec2 sensorMax = vec2(1, 0.5);
   	vec2 pixelSize = (sensorMax - sensorMin) / vec2(resolution);
     vec3 direction = normalize(vec3(sensorMin + pixelSize * fragCoord, -sensorDistance));
-  
+
   	float apertureSize = 0.0;
   	float focalPlane = 100.0;
-  	vec3 sensorPosition = origin + focalPlane * direction;  
-  	origin.xy += apertureSize * (sample2(LENS_SAMPLE_DIMENSION) - vec2(0.5));  
+  	vec3 sensorPosition = origin + focalPlane * direction;
+  	origin.xy += apertureSize * (sample2(LENS_SAMPLE_DIMENSION) - vec2(0.5));
   	direction = normalize(sensorPosition - origin);
-  
+
   	return Ray(origin, direction);
 }
 
-vec3 colorForFragment(const Scene scene, const vec2 fragCoord) {      
-  	initRandomSequence(); 
-  
-#ifdef SOLUTION_AA  
-#else
-  	// CHnage this to get anti-aliasing
+vec3 colorForFragment(const Scene scene, const vec2 fragCoord) {
+  	initRandomSequence();
+
+#ifdef SOLUTION_AA
+#else  	
+	// Put your anti-aliasing code in the #ifdef above
 	vec2 sampleCoord = fragCoord;
 #endif
     return samplePath(scene, getFragCoordRay(sampleCoord));
@@ -498,6 +471,7 @@ void loadScene1(inout Scene scene) {
   scene.spheres[0].position = vec3( 7, -2, -12);
   scene.spheres[0].radius = 2.0;
 #ifdef SOLUTION_LIGHT  
+  // Set the value of the missing property
 #endif
   scene.spheres[0].material.diffuse = vec3(0.0);
   scene.spheres[0].material.specular = vec3(0.0);
@@ -506,6 +480,7 @@ void loadScene1(inout Scene scene) {
   scene.spheres[1].position = vec3(-8, 4, -13);
   scene.spheres[1].radius = 1.0;
 #ifdef SOLUTION_LIGHT  
+  // Set the value of the missing property
 #endif
   scene.spheres[1].material.diffuse = vec3(0.0);
   scene.spheres[1].material.specular = vec3(0.0);
@@ -514,6 +489,7 @@ void loadScene1(inout Scene scene) {
   scene.spheres[2].position = vec3(-2, -2, -12);
   scene.spheres[2].radius = 3.0;
 #ifdef SOLUTION_LIGHT  
+  // Set the value of the missing property
 #endif  
   scene.spheres[2].material.diffuse = vec3(0.2, 0.5, 0.8);
   scene.spheres[2].material.specular = vec3(0.8);
@@ -522,6 +498,7 @@ void loadScene1(inout Scene scene) {
   scene.spheres[3].position = vec3(3, -3.5, -14);
   scene.spheres[3].radius = 1.0;
 #ifdef SOLUTION_LIGHT  
+  // Set the value of the missing property
 #endif  
   scene.spheres[3].material.diffuse = vec3(0.9, 0.8, 0.8);
   scene.spheres[3].material.specular = vec3(1.0);
@@ -530,6 +507,7 @@ void loadScene1(inout Scene scene) {
   scene.planes[0].normal = vec3(0, 1, 0);
   scene.planes[0].d = 4.5;
 #ifdef SOLUTION_LIGHT    
+  // Set the value of the missing property
 #endif
   scene.planes[0].material.diffuse = vec3(0.8);
   scene.planes[0].material.specular = vec3(0);
@@ -538,6 +516,7 @@ void loadScene1(inout Scene scene) {
   scene.planes[1].normal = vec3(0, 0, 1);
   scene.planes[1].d = 18.5;
 #ifdef SOLUTION_LIGHT    
+  // Set the value of the missing property
 #endif
   scene.planes[1].material.diffuse = vec3(0.9, 0.6, 0.3);
   scene.planes[1].material.specular = vec3(0.02);
@@ -546,6 +525,7 @@ void loadScene1(inout Scene scene) {
   scene.planes[2].normal = vec3(1, 0,0);
   scene.planes[2].d = 10.0;
 #ifdef SOLUTION_LIGHT    
+  // Set the value of the missing property
 #endif
   scene.planes[2].material.diffuse = vec3(0.2);
   scene.planes[2].material.specular = vec3(0.1);
@@ -554,11 +534,13 @@ void loadScene1(inout Scene scene) {
   scene.planes[3].normal = vec3(-1, 0,0);
   scene.planes[3].d = 10.0;
 #ifdef SOLUTION_LIGHT    
+  // Set the value of the missing property
 #endif
   scene.planes[3].material.diffuse = vec3(0.2);
   scene.planes[3].material.specular = vec3(0.1);
   scene.planes[3].material.glossiness = 100.0; 
 }
+
 
 void main() {
   // Setup scene
@@ -693,7 +675,7 @@ function initShaders() {
 function initBuffers() {
 	triangleVertexPositionBuffer = gl.createBuffer();
 	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
-	
+
 	var vertices = [
 		 -1,  -1,  0,
 		 -1,  1,  0,
@@ -710,29 +692,29 @@ function initBuffers() {
 
 
 function tick() {
-	
+
 // 1st pass: Trace
 	gl.bindFramebuffer(gl.FRAMEBUFFER, rttFramebuffer);
- 
+
 	gl.useProgram(traceProgram);
   	gl.uniform1i(gl.getUniformLocation(traceProgram, "globalSeed"), Math.random() * 32768.0);
-	gl.uniform1i(gl.getUniformLocation(traceProgram, "baseSampleIndex"), getCurrentFrame()); 	
+	gl.uniform1i(gl.getUniformLocation(traceProgram, "baseSampleIndex"), getCurrentFrame());
 	gl.uniform2i(
-		gl.getUniformLocation(traceProgram, "resolution"), 
-		getRenderTargetWidth(), 
+		gl.getUniformLocation(traceProgram, "resolution"),
+		getRenderTargetWidth(),
 		getRenderTargetHeight());
-		
+
 	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
 	gl.vertexAttribPointer(
-		traceProgram.vertexPositionAttribute, 
-		triangleVertexPositionBuffer.itemSize, 
-		gl.FLOAT, 
-		false, 
+		traceProgram.vertexPositionAttribute,
+		triangleVertexPositionBuffer.itemSize,
+		gl.FLOAT,
+		false,
 		0,
 		0);
-	
+
     	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-    
+
 	gl.disable(gl.DEPTH_TEST);
 	gl.enable(gl.BLEND);
 	gl.blendFunc(gl.ONE, gl.ONE);
@@ -743,19 +725,19 @@ function tick() {
    	gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
 	gl.useProgram(copyProgram);
-	gl.uniform1i(gl.getUniformLocation(copyProgram, "sampleCount"), getCurrentFrame() + 1); 
-  		
+	gl.uniform1i(gl.getUniformLocation(copyProgram, "sampleCount"), getCurrentFrame() + 1);
+
 	gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
 	gl.vertexAttribPointer(
-		copyProgram.vertexPositionAttribute, 
-		triangleVertexPositionBuffer.itemSize, 
-		gl.FLOAT, 
-		false, 
+		copyProgram.vertexPositionAttribute,
+		triangleVertexPositionBuffer.itemSize,
+		gl.FLOAT,
+		false,
 		0,
 		0);
-	
+
     	gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-    
+
 	gl.disable(gl.DEPTH_TEST);
 	gl.disable(gl.BLEND);
 
@@ -763,30 +745,30 @@ function tick() {
     	gl.bindTexture(gl.TEXTURE_2D, rttTexture);
 	gl.uniform1i(gl.getUniformLocation(copyProgram, "radianceTexture"), 0);
 	gl.uniform2i(
-		gl.getUniformLocation(copyProgram, "resolution"), 
-		getRenderTargetWidth(), 
+		gl.getUniformLocation(copyProgram, "resolution"),
+		getRenderTargetWidth(),
 		getRenderTargetHeight());
-	
+
 	gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
 
 	gl.bindTexture(gl.TEXTURE_2D, null);
 }
 
-function init() {	
+function init() {
 	initShaders();
 	initBuffers();
-	gl.clear(gl.COLOR_BUFFER_BIT);	
+	gl.clear(gl.COLOR_BUFFER_BIT);
 
 	rttFramebuffer = gl.createFramebuffer();
 	gl.bindFramebuffer(gl.FRAMEBUFFER, rttFramebuffer);
-	
+
 	rttTexture = gl.createTexture();
 	gl.bindTexture(gl.TEXTURE_2D, rttTexture);
     	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     	gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-	
-	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, getRenderTargetWidth(), getRenderTargetHeight(), 0, gl.RGBA, gl.FLOAT, null);  
-    	
+
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, getRenderTargetWidth(), getRenderTargetHeight(), 0, gl.RGBA, gl.FLOAT, null);
+
 	gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, rttTexture, 0);
 }
 
@@ -794,16 +776,16 @@ var oldWidth = 0;
 var oldTraceProgram;
 var oldCopyProgram;
 function compute(canvas) {
-	
-	if(	getRenderTargetWidth() != oldWidth || 
+
+	if(	getRenderTargetWidth() != oldWidth ||
 		oldTraceProgram != document.getElementById("TraceFS") ||
 		oldCopyProgram !=  document.getElementById("CopyFS"))
 	{
 		init();
-					
+
 		oldWidth = getRenderTargetWidth();
 		oldTraceProgram = document.getElementById("TraceFS");
-		oldCopyProgram = document.getElementById("CopyFS");	
+		oldCopyProgram = document.getElementById("CopyFS");
 	}
 
 	tick();
