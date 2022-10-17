@@ -1,7 +1,7 @@
 // filename: cw1_student.uclcg
 // tabGroup: Coursework
 // thumbnail: cw1_thumb.png
-// displayname: Coursework 1 - 2022/2023
+// displayname: Coursework 1 - 2021/2022
 // shortDescription: Coursework 1 - Ray Tracing
 // author: None
 // isHidden: false 
@@ -315,7 +315,7 @@ Ray getFragCoordRay(const vec2 frag_coord) {
   	return Ray(origin, direction);
 }
 
-float fresnel(const vec3 viewDirection, const vec3 normal) {
+float fresnel(const vec3 viewDirection, const vec3 normal, const float sourceIOR, const float destIOR) {
 #ifdef SOLUTION_FRESNEL
 #else
   	// Put your code to compute the Fresnel effect in the ifdef above
@@ -338,6 +338,12 @@ vec3 colorForFragment(const Scene scene, const vec2 fragCoord) {
   	
   	// The initial strength of the reflection
   	float reflectionWeight = 1.0;
+	
+	// The initial medium is air
+  	float currentIOR = 1.0;
+	
+    float sourceIOR = 1.0;
+	float destIOR = 1.0;
   	
   	const int maxReflectionStepCount = 2;
   	for(int i = 0; i < maxReflectionStepCount; i++) {
@@ -371,9 +377,6 @@ vec3 colorForFragment(const Scene scene, const vec2 fragCoord) {
   	currentRay = initialRay;  
   	currentHitInfo = initialHitInfo;
    
-  	// The initial medium is air
-  	float currentIOR = 1.0;
-
   	// The initial strength of the refraction.
   	float refractionWeight = 1.0;
   
@@ -383,7 +386,7 @@ vec3 colorForFragment(const Scene scene, const vec2 fragCoord) {
 #ifdef SOLUTION_REFLECTION_REFRACTION
 #else
       // Put your refraction weighting code in the ifdef above
-      reflectionWeight *= 0.5;      
+      refractionWeight *= 0.5;      
 #endif
 
 #ifdef SOLUTION_FRESNEL
@@ -468,7 +471,7 @@ void main() {
 		scene.spheres[2].radius              	= 2.0;
 		scene.spheres[2].material   			= getGlassMaterial();
 
-		scene.planes[0].normal            		= normalize(vec3(0, 0.8, 0));
+		scene.planes[0].normal            		= normalize(vec3(0, 1.0, 0));
 		scene.planes[0].d              			= -4.5;
 		scene.planes[0].material				= getSteelMirrorMaterial();
 
@@ -695,3 +698,4 @@ function compute(canvas)
 
     env.drawScene();
 }
+
