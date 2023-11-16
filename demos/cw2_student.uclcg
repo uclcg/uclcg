@@ -1,3 +1,10 @@
+// filename: cw2_student.uclcg
+// tabGroup: Coursework
+// thumbnail: cw2_thumb.png
+// displayname: Coursework 2 - 2023/2024
+// shortDescription: Coursework 2 - Rasterization
+// author: None
+// isHidden: false 
 function setup()
 {
 	UI = {};
@@ -8,19 +15,20 @@ function setup()
 	UI.maxFPS = 25;
 	UI.renderWidth = 200;
 	UI.renderHeight = 100;
+
 	UI.tabs.push(
 		{
 		visible: true,
 		type: `x-shader/x-fragment`,
 		title: `Rasterization`,
 		id: `RasterizationDemoFS`,
-		initialValue:` 
+		initialValue: ` 
 //#define SOLUTION_RASTERIZATION
 //#define SOLUTION_CLIPPING
 //#define SOLUTION_INTERPOLATION
 //#define SOLUTION_ZBUFFERING
+//#define SOLUTION_BLENDING
 //#define SOLUTION_AALIAS
-//#define SOLUTION_TEXTURING
 
 precision highp float;
 uniform float time;
@@ -32,23 +40,14 @@ uniform ivec2 viewport;
 
 struct Vertex {
     vec4 position;
-    vec3 color;
-	vec2 texCoord;
+    vec4 color;
 };
-
-const int TEXTURE_NONE = 0;
-const int TEXTURE_CHECKERBOARD = 1;
-const int TEXTURE_POLKADOT = 2;
-const int TEXTURE_VORONOI = 3;
-
-const int globalPrngSeed = 7;
 
 struct Polygon {
     // Numbers of vertices, i.e., points in the polygon
     int vertexCount;
     // The vertices themselves
     Vertex vertices[MAX_VERTEX_COUNT];
-	int textureType;
 };
 
 // Appends a vertex to a polygon
@@ -67,7 +66,6 @@ void copyPolygon(inout Polygon destination, Polygon source) {
         destination.vertices[i] = source.vertices[i];
     }
     destination.vertexCount = source.vertexCount;
-	destination.textureType = source.textureType;
 }
 
 // Get the i-th vertex from a polygon, but when asking for the one behind the last, get the first again
@@ -138,7 +136,6 @@ void sutherlandHodgmanClip(Polygon unclipped, Polygon clipWindow, out Polygon re
 
     // Copy the last version to the output
     copyPolygon(result, clipped);
-	clipped.textureType = unclipped.textureType;
 }
 
 // SOLUTION_RASTERIZATION and culling part
@@ -196,9 +193,8 @@ float triangleArea(vec2 a, vec2 b, vec2 c) {
 }
 
 Vertex interpolateVertex(vec2 point, Polygon polygon) {
-    vec3 colorSum = vec3(0.0);
+    vec4 colorSum = vec4(0.0);
     vec4 positionSum = vec4(0.0);
-	vec2 texCoordSum = vec2(0.0);
     float weight_sum = 0.0;
 	float weight_corr_sum = 0.0;
     
@@ -215,9 +211,6 @@ Vertex interpolateVertex(vec2 point, Polygon polygon) {
 #ifdef SOLUTION_INTERPOLATION
             // TODO
 #endif
-
-#ifdef SOLUTION_TEXTURING
-#endif
         }
     }
     Vertex result = polygon.vertices[0];
@@ -228,9 +221,6 @@ Vertex interpolateVertex(vec2 point, Polygon polygon) {
 #ifdef SOLUTION_ZBUFFERING
     // TODO
 #endif
-
-#ifdef SOLUTION_TEXTURING
-#endif 
 
   return result;
 }
@@ -330,92 +320,23 @@ void projectPolygon(inout Polygon projectedPolygon, Polygon polygon) {
     }
 }
 
-int intModulo(int a, int b)
-{
-	// Manual implementation of mod for int; note the % operator & mod for int isn't supported in some WebGL versions.
-	return a - (a/b)*b;
-}
+#define BLEND_GL_ZERO 0
+#define BLEND_GL_ONE 1
+#define BLEND_GL_SRC_ALPHA 2
+#define BLEND_GL_ONE_MINUS_SRC_ALPHA 3
 
 
-vec3 textureCheckerboard(vec2 texCoord)
-{
-	#ifdef SOLUTION_TEXTURING
-	#endif
-	return vec3(1.0, 0.0, 0.0); 
-}
+// Returns the blend factor based on the symbol passed
+#ifdef SOLUTION_BLENDING
+#endif
 
-int prngSeed = 5;
-const int prngMult = 174763; // This is a prime
-const float maxUint = 2147483647.0; // Max magnitude of a 32-bit signed integer
-
-float prngUniform01()
-{
-	// Very basic linear congruential generator (https://en.wikipedia.org/wiki/Lehmer_random_number_generator)
-	// Using signed integers (as some WebGL doesn't support unsigned).
-	prngSeed *= prngMult;
-	// Now the seed is a "random" value between -2147483648 and 2147483647. 
-	// Convert to float and scale to the 0,1 range.
-	float val = float(prngSeed) / maxUint;
-	return 0.5 + (val * 0.5);
-}
-
-float prngUniform(float min, float max)
-{
-	return prngUniform01() * (max - min) + min;
-}
-
-vec3 hsv2rgb(vec3 c)
-{
-    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
-    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
-    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
-}
-
-vec3 randomColor()
-{
-	return hsv2rgb(vec3(prngUniform01(), prngUniform(0.4, 1.0), prngUniform(0.7, 1.0)));
-}
-
-vec3 texturePolkadot(vec2 texCoord)
-{
-	const vec3 bgColor = vec3(0.8, 0.8, 0.1);
-	// This implementation is global, adding a set number of dots at random to the whole texture.
-	prngSeed = globalPrngSeed; // Need to reseed here to play nicely with anti-aliasing
-	const int nPolkaDots = 30;
-	const float polkaDotRadius = 0.03;
-	vec3 color = bgColor;
-	
-	#ifdef SOLUTION_TEXTURING
-	#endif 
-	return color;
-}
-
-vec3 textureVoronoi(vec2 texCoord)
-{
-	// This implementation is global, adding a set number of cells at random to the whole texture.
-	prngSeed = globalPrngSeed; // Need to reseed here to play nicely with anti-aliasing
-	const int nVoronoiCells = 15;
-	
-	#ifdef SOLUTION_TEXTURING
-	#endif
-	return vec3(0.0, 0.0, 1.0); 
-}
-
-vec3 getInterpVertexColor(Vertex interpVertex, int textureType)
-{
-	#ifdef SOLUTION_TEXTURING
-	#else
-	return interpVertex.color;
-	#endif
-	return vec3(1.0, 0.0, 1.0);
-}
 
 // Draws a polygon by projecting, clipping, ratserizing and interpolating it
 void drawPolygon(
   vec2 point, 
   Polygon clipWindow, 
   Polygon oldPolygon, 
-  inout vec3 color, 
+  inout vec4 color, 
   inout float depth)
 {
     Polygon projectedPolygon;
@@ -426,24 +347,41 @@ void drawPolygon(
 
     if (isPointInPolygon(point, clippedPolygon)) {
       
-        Vertex interpolatedVertex = 
-          interpolateVertex(point, projectedPolygon);
+        Vertex interpolatedVertex = interpolateVertex(point, projectedPolygon);
+		
+		// Set your BLEND symbols here
+		int src_blend_mode = BLEND_GL_ONE;
+		int dst_blend_mode = BLEND_GL_ZERO;
+		//int src_blend_mode = BLEND_GL_ONE;
+		//int dst_blend_mode = BLEND_GL_ONE;
+		//int src_blend_mode = BLEND_GL_SRC_ALPHA;
+		//int dst_blend_mode = BLEND_GL_ONE_MINUS_SRC_ALPHA;
+		
 #ifdef SOLUTION_ZBUFFERING
+		// TODO 
+		
+#ifdef SOLUTION_BLENDING
+		// TODO
 #else
-      color = getInterpVertexColor(interpolatedVertex, oldPolygon.textureType);
-      depth = interpolatedVertex.position.z;      
+			// TODO
 #endif
+			// TODO
+#else
+		color = interpolatedVertex.color;
+    	depth = interpolatedVertex.position.z;      
+#endif
+		
    }
   
    if (isPointOnPolygonVertex(point, clippedPolygon)) {
-        color = vec3(1);
+        color = vec4(1);
    }
 }
 
 // Main function calls
 
-void drawScene(vec2 pixelCoord, inout vec3 color) {
-    color = vec3(0.3, 0.3, 0.3);
+void drawScene(vec2 pixelCoord, inout vec4 color) {
+    color = vec4(0.3, 0.3, 0.3, 1.0);
   
   	// Convert from GL pixel coordinates 0..N-1 to our screen coordinates -1..1
     vec2 point = 2.0 * pixelCoord / vec2(viewport) - vec2(1.0);
@@ -454,11 +392,9 @@ void drawScene(vec2 pixelCoord, inout vec3 color) {
     clipWindow.vertices[2].position = vec4( 0.75, -0.65, 1.0, 1.0);
     clipWindow.vertices[3].position = vec4(-0.75, -0.85, 1.0, 1.0);
     clipWindow.vertexCount = 4;
-	
-	clipWindow.textureType = TEXTURE_NONE;
   
   	// Draw the area outside the clip region to be dark
-    color = isPointInPolygon(point, clipWindow) ? vec3(0.5) : color;
+    color = isPointInPolygon(point, clipWindow) ? vec4(vec3(0.2), 1.0) : color;
 
     const int triangleCount = 3;
     Polygon triangles[triangleCount];
@@ -467,39 +403,28 @@ void drawScene(vec2 pixelCoord, inout vec3 color) {
     triangles[0].vertices[0].position = vec4(-3, -2, 0.0, 1.0);
     triangles[0].vertices[1].position = vec4(4, 0, 3.0, 1.0);
     triangles[0].vertices[2].position = vec4(-1, 2, 0.0, 1.0);
-    triangles[0].vertices[0].color = vec3(1.0, 1.0, 0.2);
-    triangles[0].vertices[1].color = vec3(0.8, 0.8, 0.8);
-    triangles[0].vertices[2].color = vec3(0.5, 0.2, 0.5);
-	triangles[0].vertices[0].texCoord = vec2(0.0, 0.0);
-    triangles[0].vertices[1].texCoord = vec2(0.0, 1.0);
-    triangles[0].vertices[2].texCoord = vec2(1.0, 0.0);
-	triangles[0].textureType = TEXTURE_CHECKERBOARD;
+    triangles[0].vertices[0].color = vec4(1.0, 1.0, 0.2, 1.0);
+    triangles[0].vertices[1].color = vec4(0.8, 0.8, 0.8, 1.0);
+    triangles[0].vertices[2].color = vec4(0.5, 0.2, 0.5, 1.0);
   
 	triangles[1].vertexCount = 3;
     triangles[1].vertices[0].position = vec4(3.0, 2.0, -2.0, 1.0);
   	triangles[1].vertices[2].position = vec4(0.0, -2.0, 3.0, 1.0);
     triangles[1].vertices[1].position = vec4(-1.0, 2.0, 4.0, 1.0);
-    triangles[1].vertices[1].color = vec3(0.2, 1.0, 0.1);
-    triangles[1].vertices[2].color = vec3(1.0, 1.0, 1.0);
-    triangles[1].vertices[0].color = vec3(0.1, 0.2, 1.0);
-	triangles[1].vertices[0].texCoord = vec2(0.0, 0.0);
-    triangles[1].vertices[1].texCoord = vec2(0.0, 1.0);
-    triangles[1].vertices[2].texCoord = vec2(1.0, 0.0);
-	triangles[1].textureType = TEXTURE_POLKADOT;
+    triangles[1].vertices[1].color = vec4(0.2, 1.0, 0.1, 1.0);
+    triangles[1].vertices[2].color = vec4(1.0, 1.0, 1.0, 1.0);
+    triangles[1].vertices[0].color = vec4(0.1, 0.2, 1.0, 1.0);
 	
 	triangles[2].vertexCount = 3;	
 	triangles[2].vertices[0].position = vec4(-1.0, -2.0, 0.0, 1.0);
   	triangles[2].vertices[1].position = vec4(-4.0, 2.0, 0.0, 1.0);
     triangles[2].vertices[2].position = vec4(-4.0, -2.0, 0.0, 1.0);
-    triangles[2].vertices[1].color = vec3(0.2, 1.0, 0.1);
-    triangles[2].vertices[2].color = vec3(1.0, 1.0, 1.0);
-    triangles[2].vertices[0].color = vec3(0.1, 0.2, 1.0);
-	triangles[2].vertices[0].texCoord = vec2(0.0, 0.0);
-    triangles[2].vertices[1].texCoord = vec2(0.0, 1.0);
-    triangles[2].vertices[2].texCoord = vec2(1.0, 0.0);
-	triangles[2].textureType = TEXTURE_VORONOI;
+    triangles[2].vertices[1].color = vec4(0.2, 1.0, 0.1, 1.0);
+    triangles[2].vertices[2].color = vec4(1.0, 1.0, 1.0, 1.0);
+    triangles[2].vertices[0].color = vec4(0.1, 0.2, 1.0, 1.0);
 	
     float depth = 10000.0;
+	
     // Project and draw all the triangles
     for (int i = 0; i < triangleCount; i++) {
         drawPolygon(point, clipWindow, triangles[i], color, depth);
@@ -508,15 +433,14 @@ void drawScene(vec2 pixelCoord, inout vec3 color) {
 
 void main() {
 	
-	vec3 color = vec3(0);
+	vec4 color = vec4(0.0);
 	
 #ifdef SOLUTION_AALIAS
 #else
     drawScene(gl_FragCoord.xy, color);
 #endif
 	
-	gl_FragColor.rgb = color;	
-    gl_FragColor.a = 1.0;
+	gl_FragColor.rgba = color;
 }`,
 		description: ``,
 		wrapFunctionStart: ``,
