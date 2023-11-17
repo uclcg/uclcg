@@ -394,7 +394,7 @@ void drawScene(vec2 pixelCoord, inout vec4 color) {
     clipWindow.vertexCount = 4;
   
   	// Draw the area outside the clip region to be dark
-    color = isPointInPolygon(point, clipWindow) ? vec4(vec3(0.2), 1.0) : color;
+    color = isPointInPolygon(point, clipWindow) ? vec4(vec3(0.5), 1.0) : color;
 
     const int triangleCount = 3;
     Polygon triangles[triangleCount];
