@@ -1,7 +1,7 @@
 // filename: cw3_student.uclcg
 // tabGroup: Coursework
 // thumbnail: cw3_thumb.png
-// displayname: Coursework 3 - 2022/2023
+// displayname: Coursework 3 - 2023/2024
 // shortDescription: Coursework 3 - Path Tracing
 // author: None
 // isHidden: false
@@ -12,10 +12,10 @@ function setup()
 	UI.tabs = [];
 	UI.titleLong = 'Path Tracer';
 	UI.titleShort = 'PathTracer';
-	UI.numFrames = 5000;
+	UI.numFrames = 1000;
 	UI.maxFPS = 1000;
-	UI.renderWidth = 512;
-	UI.renderHeight = 256;
+	UI.renderWidth = 1024;
+	UI.renderHeight = 512;
 
 	UI.tabs.push(
 		{
@@ -26,14 +26,14 @@ function setup()
 		initialValue: `//#define SOLUTION_LIGHT
 //#define SOLUTION_BOUNCE
 //#define SOLUTION_THROUGHPUT
-//#define SOLUTION_HALTON
 //#define SOLUTION_AA
-//#define SOLUTION_IS
 //#define SOLUTION_MB
+//#define SOLUTION_VR
+
 
 precision highp float;
 
-#define M_PI 3.1415
+#define M_PI 3.14159265359
 
 struct Material {
 	#ifdef SOLUTION_LIGHT
@@ -63,7 +63,7 @@ const int emittingSphereCount = 2;
 #ifdef SOLUTION_BOUNCE
 #else
 const int maxPathLength = 1;
-#endif
+#endif 
 
 struct Scene {
 	Sphere[sphereCount] spheres;
@@ -96,7 +96,7 @@ HitInfo getEmptyHit() {
 	#endif
 	emptyMaterial.diffuse = vec3(0.0);
 	emptyMaterial.specular = vec3(0.0);
-	emptyMaterial.glossiness = 0.0;
+	emptyMaterial.glossiness = 1.0;
 	return HitInfo(false, 0.0, vec3(0.0), vec3(0.0), emptyMaterial);
 }
 
@@ -137,7 +137,7 @@ bool getSmallestTInInterval(float t0, float t1, const float tMin, const float tM
 }
 
 // Converts a random integer in 15 bits to a float in (0, 1)
-float randomInetegerToRandomFloat(int i) {
+float randomIntegerToRandomFloat(int i) {
 	return float(i) / 32768.0;
 }
 
@@ -150,7 +150,7 @@ int pixelIntegerSeed(const int dimensionIndex) {
 
 // Returns a random float for every pixel that remains the same in all iterations
 float pixelSeed(const int dimensionIndex) {
-	return randomInetegerToRandomFloat(pixelIntegerSeed(dimensionIndex));
+	return randomIntegerToRandomFloat(pixelIntegerSeed(dimensionIndex));
 }
 
 // The global random seed of this iteration
@@ -172,42 +172,18 @@ int rand() {
 	return mod(randomSeed / 65536, 32768);
 }
 
+float uniformRandomImproved(vec2 co){
+    float a = 12.9898;
+    float b = 78.233;
+    float c = 43758.5453;
+    float dt= dot(co.xy ,vec2(a,b));
+    float sn= mod(dt,3.14);
+    return fract(sin(sn) * c);
+}
+
 // Returns the next float in this pixels pseudo-random sequence
 float uniformRandom() {
-	return randomInetegerToRandomFloat(rand());
-}
-
-// Returns the ith prime number for the first 20
-const int maxDimensionCount = 10;
-int prime(const int index) {
-	if(index == 0) return 2;
-	if(index == 1) return 3;
-	if(index == 2) return 5;
-	if(index == 3) return 7;
-	if(index == 4) return 11;
-	if(index == 5) return 13;
-	if(index == 6) return 17;
-	if(index == 7) return 19;
-	if(index == 8) return 23;
-	if(index == 9) return 29;
-	if(index == 10) return 31;
-	if(index == 11) return 37;
-	if(index == 12) return 41;
-	if(index == 13) return 43;
-	if(index == 14) return 47;
-	if(index == 15) return 53;
-	return 2;
-}
-
-#ifdef SOLUTION_HALTON
-#endif
-
-float halton(const int sampleIndex, const int dimensionIndex) {
-	#ifdef SOLUTION_HALTON
-	#else
-	// Put your implementation of halton in the #ifdef above 
-	return 0.0;
-	#endif
+	return randomIntegerToRandomFloat(rand());
 }
 
 // This is the index of the sample controlled by the framework.
@@ -216,11 +192,8 @@ uniform int baseSampleIndex;
 
 // Returns a well-distributed number in (0,1) for the dimension dimensionIndex
 float sample(const int dimensionIndex) {
-	#ifdef SOLUTION_HALTON
-	#else
-	// Use the Halton sequence for variance reduction in the #ifdef above
-	return uniformRandom();
-	#endif
+	// combining 2 PRNGs to avoid the patterns in the C-standard LCG
+	return uniformRandomImproved(vec2(uniformRandom(), uniformRandom()));
 }
 
 // This is a helper function to sample two-dimensionaly in dimension dimensionIndex
@@ -234,8 +207,6 @@ vec3 sample3(const int dimensionIndex) {
 
 // This is a register of all dimensions that we will want to sample.
 // Thanks to Iliyan Georgiev from Solid Angle for explaining proper housekeeping of sample dimensions in ranomdized Quasi-Monte Carlo
-//
-// So if we want to use lens sampling, we call sample(LENS_SAMPLE_DIMENSION).
 //
 // There are infinitely many path sampling dimensions.
 // These start at PATH_SAMPLE_DIMENSION.
@@ -380,23 +351,28 @@ mat3 transpose(mat3 m) {
 	);
 }
 
-// This function creates a matrix to transform from global space into a local space oriented around the normal.
-// Might be useful for importance sampling BRDF / the geometric term.
-mat3 makeLocalFrame(const vec3 normal) {
-	#ifdef SOLUTION_IS
+// This function creates a matrix to transform from global space into a local space oriented around the provided vector.
+mat3 makeLocalFrame(const vec3 vector) {
+	#ifdef SOLUTION_VR
 	#else
 	return mat3(1.0);
 	#endif
 }
 
-DirectionSample sampleDirection(const vec3 normal, const int dimensionIndex) {
-	DirectionSample result;
+float luminance(const vec3 color) {
+    return dot(color, vec3(0.2126, 0.7152, 0.0722));
+}
 
-	#ifdef SOLUTION_IS
+#define EPSILON (1e-6)  // for avoiding numeric issues caused by floating point accuracy
+
+DirectionSample sampleDirection(const vec3 normal, const vec3 inDirection, const vec3 diffuse, const vec3 specular, const float n, const int dimensionIndex) {
+	DirectionSample result;
+		
+	#ifdef SOLUTION_VR
 	#else
-	// Put yout code to compute Importance Sampling in the #ifdef above 
+	// Depending on the technique: put your variance reduction code in the #ifdef above 
 	result.direction = getRandomDirection(dimensionIndex);	
-	result.probability = 1.0;
+	result.probability = 1.0 / (4.0 * M_PI);
 	#endif
 	return result;
 }
@@ -419,7 +395,7 @@ vec3 samplePath(const Scene scene, const Ray initialRay) {
 		DirectionSample directionSample;
 		#ifdef SOLUTION_BOUNCE
 		#else
-		// Put your code to compute the next ray in the #ifdef above
+			// Put your code to compute the next ray in the #ifdef above
 		#endif
 
 		#ifdef SOLUTION_THROUGHPUT
@@ -428,12 +404,9 @@ vec3 samplePath(const Scene scene, const Ray initialRay) {
 		throughput *= 0.1;
 		#endif
 
-		#ifdef SOLUTION_IS
-		#else
-		// Without Importance Sampling, there is nothing to do here. 
-		// Put your Importance Sampling code in the #ifdef above
-		#endif
-
+		// div by probability of sampled direction 
+		throughput /= directionSample.probability; 
+	
 		#ifdef SOLUTION_BOUNCE
 		#else
 		// Put some handling of the next and the current ray in the #ifdef above
@@ -472,16 +445,15 @@ vec3 colorForFragment(const Scene scene, const vec2 fragCoord) {
 	return samplePath(scene, getFragCoordRay(sampleCoord));
 }
 
-
 void loadScene1(inout Scene scene) {
 
-	scene.spheres[0].position = vec3( 7, -2, -12);
+	scene.spheres[0].position = vec3(7, -2, -12);
 	scene.spheres[0].radius = 2.0;
 	// Set the value of the missing property in the ifdef below 
 #ifdef SOLUTION_LIGHT  
 #endif
-	scene.spheres[0].material.diffuse = vec3(0.0);
-	scene.spheres[0].material.specular = vec3(0.0);
+	scene.spheres[0].material.diffuse = vec3(0.5);
+	scene.spheres[0].material.specular = vec3(0.5);
 	scene.spheres[0].material.glossiness = 10.0;
 	// Set the value of the missing property in the ifdef below 
 #ifdef SOLUTION_MB
@@ -492,8 +464,8 @@ void loadScene1(inout Scene scene) {
 	// Set the value of the missing property in the ifdef below 
 #ifdef SOLUTION_LIGHT  
 #endif
-	scene.spheres[1].material.diffuse = vec3(0.0);
-	scene.spheres[1].material.specular = vec3(0.0);
+	scene.spheres[1].material.diffuse = vec3(0.5);
+	scene.spheres[1].material.specular = vec3(0.5);
 	scene.spheres[1].material.glossiness = 10.0;
 	// Set the value of the missing property in the ifdef below 
 #ifdef SOLUTION_MB
@@ -529,7 +501,7 @@ void loadScene1(inout Scene scene) {
 #ifdef SOLUTION_LIGHT    
 #endif
 	scene.planes[0].material.diffuse = vec3(0.8);
-	scene.planes[0].material.specular = vec3(0);
+	scene.planes[0].material.specular = vec3(0.0);
 	scene.planes[0].material.glossiness = 50.0;    
 
 	scene.planes[1].normal = vec3(0, 0, 1);
