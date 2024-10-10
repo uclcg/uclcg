@@ -24,7 +24,7 @@
         "https://uclcg.github.io/uclcg/demos/thumb_splines.png"
     ],
     "niceNames": [
-        "Coursework 1 - 2023/2024",
+        "Coursework 1 - 2024/2025",
         "Coursework 2 - 2023/2024",
         "Coursework 3 - 2023/2024",
         "Demo - Animated OpenGL",
@@ -48,7 +48,7 @@
         "None"
     ],
     "hidden": [
-        "true",
+        "false",
         "true",
         "true",
         "false",
