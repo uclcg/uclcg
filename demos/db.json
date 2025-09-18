@@ -48,9 +48,9 @@
         "None"
     ],
     "hidden": [
-        "false",
-        "false",
-        "false",
+        "True",
+        "True",
+        "True",
         "false",
         "false",
         "false"
