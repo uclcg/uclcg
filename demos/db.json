@@ -24,9 +24,9 @@
         "https://uclcg.github.io/uclcg/demos/thumb_splines.png"
     ],
     "niceNames": [
-        "Coursework 1 - 2024/2025",
-        "Coursework 2 - 2024/2025",
-        "Coursework 3 - 2024/2025",
+        "Coursework 1 - 2025/2026",
+        "Coursework 2 - 2025/2026",
+        "Coursework 3 - 2025/2026",
         "Demo - Animated OpenGL",
         "Demo - Simple Camera",
         "Demo - Animated Splines"
@@ -48,7 +48,7 @@
         "None"
     ],
     "hidden": [
-        "true",
+        "false",
         "true",
         "true",
         "false",
