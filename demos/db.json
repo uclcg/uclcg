@@ -26,7 +26,7 @@
     "niceNames": [
         "Coursework 1 - 2025/2026",
         "Coursework 2 - 2025/2026",
-        "Coursework 3 - 2025/2026",
+        "Coursework 2 - 2025/2026",
         "Demo - Animated OpenGL",
         "Demo - Simple Camera",
         "Demo - Animated Splines"
@@ -34,7 +34,7 @@
     "shortDescriptions": [
         "Coursework 1 - Ray Tracing",
         "Coursework 2 - Rasterization",
-        "Coursework 3 - Path Tracing",
+        "Coursework 2 - Path Tracing",
         "An animated demo for OpenGL.",
         "A simple camera model.",
         "An animated demo for splines."
@@ -50,7 +50,7 @@
     "hidden": [
         "false",
         "true",
-        "true",
+        "false",
         "false",
         "false",
         "false"
